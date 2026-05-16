@@ -116,9 +116,9 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 .tl-row1{display:flex;gap:5px;align-items:center;margin-bottom:5px;}
 .tl-row2{display:flex;}
 .inp-time{width:60px;flex:0 0 60px;min-width:0;padding:6px 4px;font-size:12px;text-align:center;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
-.inp-place{width:80px;flex:0 0 80px;min-width:0;padding:6px 5px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
+.inp-place{width:120px;flex:0 0 120px;min-width:0;padding:6px 5px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
 .inp-title{flex:1 1 0;min-width:0;width:100%;padding:6px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
-.del-btn{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.del-btn{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:0.5px solid #EF9F27;background:transparent;color:#633806;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .tl-col-hd{display:flex;gap:5px;padding-bottom:5px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:3px;}
 </style>
 </head>
@@ -240,7 +240,7 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
       </div>
       <div class="tl-col-hd">
         <span style="width:60px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">時刻</span>
-        <span style="width:80px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">場所</span>
+        <span style="width:120px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">場所</span>
         <span style="flex:1;font-size:10px;color:var(--color-text-secondary);">内容</span>
         <span style="width:28px;flex-shrink:0;"></span>
       </div>
@@ -253,7 +253,7 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
       </div>
       <div class="tl-col-hd">
         <span style="width:60px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">時刻</span>
-        <span style="width:80px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">場所</span>
+        <span style="width:120px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">場所</span>
         <span style="flex:1;font-size:10px;color:var(--color-text-secondary);">内容</span>
         <span style="width:28px;flex-shrink:0;"></span>
       </div>
@@ -337,6 +337,7 @@ let state = {
   history: []
 };
 let deptPart='am';
+let progPartManual=null; // null=時刻自動, 'am'/'pm'=手動選択
 let noticeTag='info';
 let editAmTl=[],editPmTl=[];
 let saving=false;
@@ -501,12 +502,17 @@ function renderProgTab(){
     document.getElementById('ps-am').classList.add('active');
     document.getElementById('ps-pm').classList.remove('active');
   } else {
-    // 両方：現在時刻が12:00以降なら午後をデフォルト表示
-    const defaultPm = new Date().getHours() >= 12;
-    document.getElementById('prog-am').style.display=defaultPm?'none':'block';
-    document.getElementById('prog-pm').style.display=defaultPm?'block':'none';
-    document.getElementById('ps-am').classList.toggle('active',!defaultPm);
-    document.getElementById('ps-pm').classList.toggle('active',defaultPm);
+    // 両方：手動選択がある場合はそちらを優先、なければ時刻で自動判定
+    let showPmTab;
+    if(progPartManual!==null){
+      showPmTab = progPartManual==='pm';
+    } else {
+      showPmTab = new Date().getHours() >= 12;
+    }
+    document.getElementById('prog-am').style.display=showPmTab?'none':'block';
+    document.getElementById('prog-pm').style.display=showPmTab?'block':'none';
+    document.getElementById('ps-am').classList.toggle('active',!showPmTab);
+    document.getElementById('ps-pm').classList.toggle('active',showPmTab);
   }
   renderProgDongsei();
 }
@@ -654,6 +660,7 @@ function renderAll(){
 
 // ── グローバル関数 ──
 window.showProgPart=p=>{
+  progPartManual=p; // 手動選択を記録
   if(p==='am')renderTimeline(state.session.amTl||DEFAULT_AM,'prog-am');
   if(p==='pm')renderTimeline(state.session.pmTl||DEFAULT_PM,'prog-pm');
   document.getElementById('prog-am').style.display=p==='am'?'block':'none';
@@ -765,7 +772,7 @@ window.showHistDetail=i=>{
       <button class="btn-outline" onclick="document.getElementById('hist-detail').style.display='none'" style="margin-top:10px;">閉じる</button>
     </div>`;
 };
-window.showTab=name=>{document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('t-'+name).classList.add('active');};
+window.showTab=name=>{document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('t-'+name).classList.add('active');if(name!=='prog')progPartManual=null;};
 window.showDeptPart=p=>{deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();};
 window.showCountPart=p=>{document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');};
 window.showAdminPart=p=>{['sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';};
