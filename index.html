@@ -416,7 +416,7 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
       <div id="tl-am-rows"></div>
     </div>
     <!-- 中間の保存ボタン（午前と午後の間） -->
-    <div style="text-align:center;margin:16px 0;">
+    <div id="tl-mid-save" style="text-align:center;margin:16px 0;">
       <button class="btn-primary" onclick="saveTl()" style="width:80%;margin:0 auto;">スケジュールを保存</button>
     </div>
     <div id="tl-pm-edit" style="margin-top:4px;">
@@ -828,6 +828,8 @@ function renderAdmin(){
   ['both','am','pm'].forEach(x=>document.getElementById('pr-'+x).classList.toggle('sel',x===pm));
   document.getElementById('tl-am-edit').style.display=(pm==='pm')?'none':'block';
   document.getElementById('tl-pm-edit').style.display=(pm==='am')?'none':'block';
+  const midBtn=document.getElementById('tl-mid-save');
+  if(midBtn)midBtn.style.display=(pm==='both')?'block':'none';
   editAmTl=clone(state.session.amTl||DEFAULT_AM);
   editPmTl=clone(state.session.pmTl||DEFAULT_PM);
   renderTlRows('am');renderTlRows('pm');
@@ -970,6 +972,8 @@ window.setPartMode=m=>{
   ['both','am','pm'].forEach(x=>document.getElementById('pr-'+x).classList.toggle('sel',x===m));
   document.getElementById('tl-am-edit').style.display=(m==='pm')?'none':'block';
   document.getElementById('tl-pm-edit').style.display=(m==='am')?'none':'block';
+  const midBtn=document.getElementById('tl-mid-save');
+  if(midBtn)midBtn.style.display=(m==='both')?'block':'none';
   const sel=state.schedules.find(x=>x.id===state.session.id);if(sel)sel.partMode=m;saveState();
 };
 window.liveEdit=(part,i,key,val)=>{const arr=part==='am'?editAmTl:editPmTl;if(arr[i])arr[i][key]=val;};
