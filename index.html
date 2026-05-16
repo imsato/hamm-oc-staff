@@ -487,16 +487,26 @@ function renderProgTab(){
   document.getElementById('ps-pm').style.display=showPm?'':'none';
   if(showAm)renderTimeline(state.session.amTl||DEFAULT_AM,'prog-am');
   if(showPm)renderTimeline(state.session.pmTl||DEFAULT_PM,'prog-pm');
+  // 開催区分に応じてデフォルト表示を決定
   if(pm==='pm'){
+    // 午後のみ：午後を表示
     document.getElementById('prog-am').style.display='none';
     document.getElementById('prog-pm').style.display='block';
     document.getElementById('ps-pm').classList.add('active');
     document.getElementById('ps-am').classList.remove('active');
-  } else {
+  } else if(pm==='am'){
+    // 午前のみ：午前を表示
     document.getElementById('prog-am').style.display='block';
     document.getElementById('prog-pm').style.display='none';
     document.getElementById('ps-am').classList.add('active');
     document.getElementById('ps-pm').classList.remove('active');
+  } else {
+    // 両方：現在時刻が12:00以降なら午後をデフォルト表示
+    const defaultPm = new Date().getHours() >= 12;
+    document.getElementById('prog-am').style.display=defaultPm?'none':'block';
+    document.getElementById('prog-pm').style.display=defaultPm?'block':'none';
+    document.getElementById('ps-am').classList.toggle('active',!defaultPm);
+    document.getElementById('ps-pm').classList.toggle('active',defaultPm);
   }
   renderProgDongsei();
 }
