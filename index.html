@@ -58,34 +58,22 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 .step-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center;}
 .step-btn{padding:7px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);}
 .step-btn.current{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent;}
-/* 「前に戻る」ボタン */
 .btn-back{padding:7px 10px;border-radius:var(--border-radius-md);border:0.5px solid #EF9F27;background:transparent;font-size:12px;cursor:pointer;color:#633806;}
 .btn-back:active{background:#FAEEDA;}
 .input-row{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;}
 .input-group{display:flex;flex-direction:column;gap:3px;}
 .input-group label{font-size:11px;color:var(--color-text-secondary);}
 .input-group input{width:100%;padding:7px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;}
-
-/* ── タイムライン ── */
 .timeline-item{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
 .tl-time{font-size:12px;min-width:52px;padding-top:2px;color:var(--color-text-secondary);}
 .tl-body{flex:1;}
 .tl-title{font-size:14px;font-weight:500;margin-bottom:2px;color:var(--color-text-primary);}
 .tl-sub{font-size:12px;color:var(--color-text-secondary);}
-/* ハイライト行 — 背景を濃い青にして文字を白で反転 */
-.tl-now{
-  background:#185FA5;
-  padding:10px 12px;
-  border-left:3px solid #0C447C;
-  border-radius:4px;
-  margin:2px 0;
-}
+.tl-now{background:#185FA5;padding:10px 12px;border-left:3px solid #0C447C;border-radius:4px;margin:2px 0;}
 .tl-now .tl-time{color:#ffffff !important;}
 .tl-now .tl-title{color:#ffffff !important;}
 .tl-now .tl-sub{color:rgba(255,255,255,0.80) !important;}
-/* 「進行中」バッジをハイライト行内で白背景・青文字に */
 .tl-now .badge-active{background:rgba(255,255,255,0.95);color:#0C447C;}
-
 .counter-big{text-align:center;padding:20px 0;}
 .counter-num{font-size:56px;font-weight:500;line-height:1;color:var(--color-text-primary);}
 .counter-btns{display:flex;gap:10px;justify-content:center;margin-top:16px;}
@@ -339,11 +327,14 @@ const DEFAULT_PM=[
   {time:'15:15',title:'キャンパスツアー',place:'12F〜'},
 ];
 
-let state={
-  depts:{},count:{am:{hs:0,par:0},pm:{hs:0,par:0}},
-  notices:[],schedules:[],
-  session:{active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:''},
-  history:[]
+// ── 状態（必ず全キーを初期値として持つ） ──
+let state = {
+  depts: {},
+  count: {am:{hs:0,par:0}, pm:{hs:0,par:0}},
+  notices: [],
+  schedules: [],
+  session: {active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:''},
+  history: []
 };
 let deptPart='am';
 let noticeTag='info';
@@ -356,18 +347,61 @@ function getNow(){const n=new Date();return n.getHours().toString().padStart(2,'
 function formatDate(d){if(!d)return'';const dt=new Date(d+'T00:00:00');return`${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-function ensureDefaults(){
-  DEPT_KEYS.forEach(k=>{
-    if(!state.depts[k])state.depts[k]={skipAm:false,skipPm:false,am:newDP(),pm:newDP()};
+// ── Firebase取得データを安全にマージする ──
+// Firebaseから来るデータは一部キーが欠けている場合があるため
+// 既存stateに対して深いマージを行いデフォルト値を保持する
+function mergeFromFirebase(data) {
+  // トップレベルの各キーを安全にマージ
+  if (data.depts && typeof data.depts === 'object') {
+    state.depts = data.depts;
+  }
+  if (data.count && typeof data.count === 'object') {
+    state.count = data.count;
+  }
+  if (Array.isArray(data.notices)) state.notices = data.notices;
+  if (Array.isArray(data.schedules)) state.schedules = data.schedules;
+  if (Array.isArray(data.history)) state.history = data.history;
+  if (data.session && typeof data.session === 'object') {
+    state.session = data.session;
+  }
+}
+
+// ── デフォルト値の補完（mergeAfterで呼ぶ） ──
+function ensureDefaults() {
+  // depts が存在しない・オブジェクトでない場合は初期化
+  if (!state.depts || typeof state.depts !== 'object') {
+    state.depts = {};
+  }
+  // 各学科のデータを補完
+  DEPT_KEYS.forEach(k => {
+    if (!state.depts[k] || typeof state.depts[k] !== 'object') {
+      state.depts[k] = {skipAm:false, skipPm:false, am:newDP(), pm:newDP()};
+    } else {
+      if (!state.depts[k].am) state.depts[k].am = newDP();
+      if (!state.depts[k].pm) state.depts[k].pm = newDP();
+    }
   });
-  if(!state.session.amTl)state.session.amTl=clone(DEFAULT_AM);
-  if(!state.session.pmTl)state.session.pmTl=clone(DEFAULT_PM);
-  if(!state.session.partMode)state.session.partMode='both';
-  if(!state.session.dongseiUrl)state.session.dongseiUrl='';
-  if(!Array.isArray(state.notices))state.notices=[];
-  if(!Array.isArray(state.schedules))state.schedules=[];
-  if(!Array.isArray(state.history))state.history=[];
-  if(!state.count)state.count={am:{hs:0,par:0},pm:{hs:0,par:0}};
+
+  // count
+  if (!state.count || typeof state.count !== 'object') {
+    state.count = {am:{hs:0,par:0}, pm:{hs:0,par:0}};
+  }
+  if (!state.count.am) state.count.am = {hs:0,par:0};
+  if (!state.count.pm) state.count.pm = {hs:0,par:0};
+
+  // session
+  if (!state.session || typeof state.session !== 'object') {
+    state.session = {active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:''};
+  }
+  if (!state.session.amTl) state.session.amTl = clone(DEFAULT_AM);
+  if (!state.session.pmTl) state.session.pmTl = clone(DEFAULT_PM);
+  if (!state.session.partMode) state.session.partMode = 'both';
+  if (!state.session.dongseiUrl) state.session.dongseiUrl = '';
+
+  // 配列
+  if (!Array.isArray(state.notices)) state.notices = [];
+  if (!Array.isArray(state.schedules)) state.schedules = [];
+  if (!Array.isArray(state.history)) state.history = [];
 }
 
 function setSyncOk(ok){
@@ -378,17 +412,35 @@ function setSyncOk(ok){
 async function saveState(){
   if(saving)return;
   saving=true;
-  try{await set(STATE_REF,clone(state));setSyncOk(true);}
-  catch(e){console.error(e);setSyncOk(false);}
-  finally{saving=false;}
+  try{
+    await set(STATE_REF, clone(state));
+    setSyncOk(true);
+  } catch(e){
+    console.error('Firebase保存エラー:', e);
+    setSyncOk(false);
+  } finally{saving=false;}
 }
 
-onValue(STATE_REF,snap=>{
-  const data=snap.val();
-  if(data){state=data;ensureDefaults();}
-  else{ensureDefaults();}
-  renderAll();setSyncOk(true);
-},err=>{console.error(err);setSyncOk(false);});
+// ── Firebase リアルタイムリスナー ──
+onValue(STATE_REF, snap => {
+  try {
+    const data = snap.val();
+    if (data && typeof data === 'object') {
+      mergeFromFirebase(data);
+    }
+    ensureDefaults();
+    renderAll();
+    setSyncOk(true);
+  } catch(e) {
+    console.error('データ処理エラー:', e);
+    ensureDefaults();
+    renderAll();
+    setSyncOk(false);
+  }
+}, err => {
+  console.error('Firebase接続エラー:', err);
+  setSyncOk(false);
+});
 
 function updateClock(){
   const el=document.getElementById('prog-time');
@@ -396,7 +448,6 @@ function updateClock(){
 }
 setInterval(updateClock,10000);updateClock();
 
-// ── タイムライン（ハイライト行は文字色を白に反転） ──
 function getCurrentPhase(tl){
   const n=new Date(),hm=n.getHours()*60+n.getMinutes();let cur=-1;
   tl.forEach((item,i)=>{const p=item.time.split(':');if(p.length===2&&hm>=parseInt(p[0])*60+parseInt(p[1]))cur=i;});
@@ -415,7 +466,6 @@ function renderTimeline(tl,id){
     </div>`;
   }).join('');
 }
-
 function renderProgDongsei(){
   const du=state.session.dongseiUrl;
   document.getElementById('prog-dongsei').innerHTML=`
@@ -451,7 +501,6 @@ function renderProgTab(){
   renderProgDongsei();
 }
 
-// ── 学科タブ（「前に戻る」ボタン付き） ──
 function isSkip(code,part){return part==='am'?state.depts[code].skipAm:state.depts[code].skipPm;}
 function renderDepts(){
   const active=DEPTS.filter(d=>!isSkip(d.code,deptPart));
@@ -463,43 +512,37 @@ function renderDepts(){
                  step===0?'<span class="badge badge-active">授業中</span>':
                  step===4?'<span class="badge badge-done">完了</span>':
                  `<span class="badge" style="background:${STEP_BG[step]};color:${STEP_COL[step]};">${STEPS[step]}</span>`;
-
-    // 人数入力欄（授業終了 step=1 のとき表示）
     const inputHtml=(!skip&&step===1)?`<div class="input-row">
       <div class="input-group"><label>高校生</label><input type="number" min="0" value="${dp.hs}" onchange="setNum('${d.code}','${deptPart}','hs',this.value)"></div>
       <div class="input-group"><label>保護者</label><input type="number" min="0" value="${dp.par}" onchange="setNum('${d.code}','${deptPart}','par',this.value)"></div>
       <div class="input-group"><label>個別相談希望</label><input type="number" min="0" value="${dp.consult}" onchange="setNum('${d.code}','${deptPart}','consult',this.value)"></div>
       <div class="input-group"><label>ツアー希望</label><input type="number" min="0" value="${dp.tour}" onchange="setNum('${d.code}','${deptPart}','tour',this.value)"></div>
     </div>`:'';
-
-    // 進むボタン + 「前に戻る」ボタン（step>=1 のとき表示）
     let stepBtns='';
     if(!skip){
       const nextBtn=step<4?`<button class="step-btn current" onclick="advanceDept('${d.code}','${deptPart}')">${STEPS[step+1]}へ進む <i class="ti ti-arrow-right" style="font-size:12px"></i></button>`:'';
-      // 「前に戻る」は step>=1（授業終了以降）のとき有効
       const backBtn=step>=1?`<button class="btn-back" onclick="backDept('${d.code}','${deptPart}')"><i class="ti ti-arrow-left" style="font-size:12px;vertical-align:-1px"></i> 前に戻る</button>`:'';
-      if(nextBtn||backBtn){
-        stepBtns=`<div class="step-btns">${nextBtn}${backBtn}</div>`;
-      }
+      if(nextBtn||backBtn) stepBtns=`<div class="step-btns">${nextBtn}${backBtn}</div>`;
     }
-
     const info=(!skip&&step>=1)?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">高校生 ${dp.hs}名 保護者 ${dp.par}名 ／ 相談 ${dp.consult}名 ツアー ${dp.tour}名${dp.doneTime?' ／ 完了 '+dp.doneTime:''}</div>`:'';
     return`<div class="dept-card"><div class="dept-header"><div class="dept-name">${d.code}：${d.name}</div>${badge}</div>${info}${inputHtml}${stepBtns}</div>`;
   }).join('');
 }
 
-// ── 来場者 ──
 function renderCount(){
   ['am','pm'].forEach(p=>{
-    const hs=state.count[p].hs,par=state.count[p].par;
-    document.getElementById(`${p}-hs`).textContent=hs;document.getElementById(`${p}-par`).textContent=par;
-    document.getElementById(`${p}-total`).textContent=hs+par;document.getElementById(`${p}-ratio`).textContent=`${hs}:${par}`;
+    const hs=state.count[p].hs||0, par=state.count[p].par||0;
+    document.getElementById(`${p}-hs`).textContent=hs;
+    document.getElementById(`${p}-par`).textContent=par;
+    document.getElementById(`${p}-total`).textContent=hs+par;
+    document.getElementById(`${p}-ratio`).textContent=`${hs}:${par}`;
   });
-  const tHs=state.count.am.hs+state.count.pm.hs,tPar=state.count.am.par+state.count.pm.par;
-  document.getElementById('day-total').textContent=tHs+tPar;document.getElementById('day-hs').textContent=tHs;
+  const tHs=(state.count.am.hs||0)+(state.count.pm.hs||0);
+  const tPar=(state.count.am.par||0)+(state.count.pm.par||0);
+  document.getElementById('day-total').textContent=tHs+tPar;
+  document.getElementById('day-hs').textContent=tHs;
 }
 
-// ── 連絡板 ──
 function renderNotices(){
   const tMap={urgent:'badge-urgent',info:'badge-info',complete:'badge-complete'};
   const tLabel={urgent:'緊急',info:'通知',complete:'完了'};
@@ -511,7 +554,6 @@ function renderNotices(){
     </div>`).join('')||'<div style="font-size:13px;color:var(--color-text-secondary);padding:12px 0;">まだ投稿はありません</div>';
 }
 
-// ── 管理 ──
 function renderAdminDongseiPreview(){
   const du=state.session.dongseiUrl;
   document.getElementById('admin-dongsei-preview').innerHTML=du?`
@@ -601,26 +643,18 @@ window.uploadDongsei=input=>{
   reader.onerror=()=>alert('読み込み失敗');
   reader.readAsDataURL(file);input.value='';
 };
-
-// 進む
 window.advanceDept=(code,part)=>{
   const dp=state.depts[code][part];
   if(dp.step<4){dp.step++;if(dp.step===4)dp.doneTime=getNow();}
   saveState();
 };
-
-// 前に戻る（step>=1 のみ有効）
-// step=1（授業終了）に戻す場合：人数データをそのまま残して再編集可能にする
-// step=0（授業中）に戻す場合：完了時刻のみクリア
 window.backDept=(code,part)=>{
   const dp=state.depts[code][part];
   if(dp.step<=0)return;
   dp.step--;
-  // 完了時刻をクリア（完了から戻った場合のみ）
   if(dp.doneTime)dp.doneTime='';
   saveState();
 };
-
 window.setNum=(code,part,key,val)=>{state.depts[code][part][key]=Math.max(0,parseInt(val)||0);saveState();};
 window.chg=(part,type,delta)=>{state.count[part][type]=Math.max(0,(state.count[part][type]||0)+delta);saveState();};
 window.selTag=t=>{noticeTag=t;['urgent','info','complete'].forEach(x=>document.getElementById('tg-'+x).classList.toggle('sel',x===t));};
@@ -628,14 +662,12 @@ window.postNotice=()=>{
   const name=(document.getElementById('notice-name').value||'').trim()||'名前未入力';
   const text=(document.getElementById('notice-text').value||'').trim();
   if(!text)return;
-  if(!Array.isArray(state.notices))state.notices=[];
   state.notices.unshift({author:name,text,tag:noticeTag,time:getNow()});
   document.getElementById('notice-text').value='';saveState();
 };
 window.addSched=()=>{
   const d=document.getElementById('new-date').value,m=document.getElementById('new-memo').value;
   if(!d)return;
-  if(!Array.isArray(state.schedules))state.schedules=[];
   if(state.schedules.find(s=>s.date===d)){alert('同じ日付が既に登録されています');return;}
   state.schedules.push({date:d,memo:m,id:'s'+Date.now(),partMode:'both',amTl:clone(DEFAULT_AM),pmTl:clone(DEFAULT_PM)});
   state.schedules.sort((a,b)=>a.date.localeCompare(b.date));
@@ -643,7 +675,7 @@ window.addSched=()=>{
 };
 window.delSched=id=>{if(!confirm('この開催日を削除しますか？'))return;state.schedules=state.schedules.filter(s=>s.id!==id);saveState();};
 window.selectSession=id=>{
-  const s=(state.schedules||[]).find(x=>x.id===id);if(!s)return;
+  const s=state.schedules.find(x=>x.id===id);if(!s)return;
   state.session.date=s.date;state.session.id=id;
   state.session.partMode=s.partMode||'both';
   state.session.amTl=s.amTl?clone(s.amTl):clone(DEFAULT_AM);
@@ -659,8 +691,7 @@ window.startSession=()=>{
 };
 window.endSession=()=>{
   if(!confirm('開催を終了して履歴に保存しますか？'))return;
-  if(!Array.isArray(state.history))state.history=[];
-  state.history.unshift({date:state.session.date,id:'h'+Date.now(),count:clone(state.count),depts:clone(state.depts),notices:clone(state.notices||[]),partMode:state.session.partMode});
+  state.history.unshift({date:state.session.date,id:'h'+Date.now(),count:clone(state.count),depts:clone(state.depts),notices:clone(state.notices),partMode:state.session.partMode});
   state.session.active=false;saveState();
 };
 window.setPartMode=m=>{
@@ -668,14 +699,14 @@ window.setPartMode=m=>{
   ['both','am','pm'].forEach(x=>document.getElementById('pr-'+x).classList.toggle('sel',x===m));
   document.getElementById('tl-am-edit').style.display=(m==='pm')?'none':'block';
   document.getElementById('tl-pm-edit').style.display=(m==='am')?'none':'block';
-  const sel=(state.schedules||[]).find(x=>x.id===state.session.id);if(sel)sel.partMode=m;saveState();
+  const sel=state.schedules.find(x=>x.id===state.session.id);if(sel)sel.partMode=m;saveState();
 };
 window.liveEdit=(part,i,key,val)=>{const arr=part==='am'?editAmTl:editPmTl;if(arr[i])arr[i][key]=val;};
 window.delTlItem=(part,i)=>{if(part==='am')editAmTl.splice(i,1);else editPmTl.splice(i,1);renderTlRows(part);};
 window.addTlItem=part=>{if(part==='am')editAmTl.push({time:'',title:'',place:''});else editPmTl.push({time:'',title:'',place:''});renderTlRows(part);};
 window.saveTl=()=>{
   state.session.amTl=clone(editAmTl);state.session.pmTl=clone(editPmTl);
-  const sel=(state.schedules||[]).find(x=>x.id===state.session.id);
+  const sel=state.schedules.find(x=>x.id===state.session.id);
   if(sel){sel.amTl=clone(editAmTl);sel.pmTl=clone(editPmTl);}
   saveState();renderProgTab();alert('スケジュールを保存しました');
 };
