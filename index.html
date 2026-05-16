@@ -628,7 +628,29 @@ function renderAdmin(){
     </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>';
 }
 
-function renderAll(){renderProgTab();renderDepts();renderCount();renderNotices();renderAdmin();}
+function getDefaultPart(){
+  // 学科・来場者タブ用：12:31以降は午後をデフォルト
+  const pm=state.session.partMode||'both';
+  if(pm==='am') return 'am';
+  if(pm==='pm') return 'pm';
+  // 両方：0:00〜12:30は午前、12:31〜23:59は午後
+  const n=new Date();
+  const minutes=n.getHours()*60+n.getMinutes();
+  return minutes >= 12*60+31 ? 'pm' : 'am';
+}
+function renderAll(){
+  renderProgTab();
+  // 学科・来場者タブのデフォルト表示を時刻で決定
+  const defaultPart=getDefaultPart();
+  deptPart=defaultPart;
+  document.getElementById('ds-am').classList.toggle('active',defaultPart==='am');
+  document.getElementById('ds-pm').classList.toggle('active',defaultPart==='pm');
+  document.getElementById('count-am-sec').style.display=defaultPart==='am'?'block':'none';
+  document.getElementById('count-pm-sec').style.display=defaultPart==='pm'?'block':'none';
+  document.getElementById('cs-am').classList.toggle('active',defaultPart==='am');
+  document.getElementById('cs-pm').classList.toggle('active',defaultPart==='pm');
+  renderDepts();renderCount();renderNotices();renderAdmin();
+}
 
 // ── グローバル関数 ──
 window.showProgPart=p=>{
