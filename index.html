@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>OC運営アプリ</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f5f5;
+  --color-text-primary:#111111;
+  --color-text-secondary:#666666;
+  --color-text-tertiary:#999999;
+  --color-border-tertiary:#e0e0e0;
+  --color-border-secondary:#cccccc;
+  --border-radius-lg:12px;
+  --border-radius-md:8px;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-background-primary:#1c1c1e;
+    --color-background-secondary:#2c2c2e;
+    --color-text-primary:#f0f0f0;
+    --color-text-secondary:#a0a0a0;
+    --color-text-tertiary:#666666;
+    --color-border-tertiary:#3a3a3c;
+    --color-border-secondary:#48484a;
+  }
+}
+body{background:var(--color-background-secondary);font-family:var(--font-sans);min-height:100vh;}
+.app{max-width:480px;margin:0 auto;padding-bottom:80px;background:var(--color-background-secondary);min-height:100vh;}
+.tab-bar{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);position:sticky;top:0;z-index:10;}
+.tab{flex:1;padding:12px 2px 10px;text-align:center;font-size:10px;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;}
+.tab.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500;}
+.tab i{display:block;font-size:20px;margin-bottom:2px;}
+.sec{display:none;padding:14px;}
+.sec.active{display:block;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:10px;}
+.label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;}
+.val{font-size:22px;font-weight:500;color:var(--color-text-primary);}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;}
+.btn-primary{display:block;width:100%;padding:12px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);font-size:14px;font-weight:500;cursor:pointer;text-align:center;margin-top:8px;}
+.btn-primary:active{opacity:0.8;}
+.btn-outline{display:block;width:100%;padding:10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;text-align:center;margin-top:6px;}
+.warn-banner{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:14px;font-size:13px;color:#633806;display:flex;gap:8px;align-items:flex-start;line-height:1.6;}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:100px;font-weight:500;}
+.badge-active{background:#E6F1FB;color:#0C447C;}
+.badge-done{background:#EAF3DE;color:#27500A;}
+.badge-skip{background:var(--color-background-secondary);color:var(--color-text-tertiary);}
+.badge-urgent{background:#FCEBEB;color:#791F1F;}
+.badge-info{background:#E6F1FB;color:#0C447C;}
+.badge-complete{background:var(--color-background-secondary);color:var(--color-text-secondary);}
+.dept-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;}
+.dept-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;}
+.dept-name{font-size:13px;font-weight:500;flex:1;line-height:1.4;color:var(--color-text-primary);}
+.step-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.step-btn{padding:7px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);}
+.step-btn.current{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent;}
+.input-row{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;}
+.input-group{display:flex;flex-direction:column;gap:3px;}
+.input-group label{font-size:11px;color:var(--color-text-secondary);}
+.input-group input{width:100%;padding:7px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;}
+.timeline-item{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.tl-time{font-size:12px;color:var(--color-text-secondary);min-width:52px;padding-top:2px;}
+.tl-body{flex:1;}
+.tl-title{font-size:14px;font-weight:500;margin-bottom:2px;color:var(--color-text-primary);}
+.tl-sub{font-size:12px;color:var(--color-text-secondary);}
+.tl-now{background:#E6F1FB;padding:10px 12px;border-left:3px solid #185FA5;}
+.counter-big{text-align:center;padding:20px 0;}
+.counter-num{font-size:56px;font-weight:500;line-height:1;color:var(--color-text-primary);}
+.counter-btns{display:flex;gap:10px;justify-content:center;margin-top:16px;}
+.cbtn{width:60px;height:60px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-text-primary);}
+.cbtn.plus{width:68px;height:68px;font-size:30px;border-color:#185FA5;color:#185FA5;}
+.cbtn:active{background:var(--color-background-secondary);}
+.compose{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:12px;}
+.compose textarea{width:100%;border:none;background:transparent;font-size:14px;font-family:var(--font-sans);color:var(--color-text-primary);resize:none;outline:none;min-height:56px;line-height:1.6;}
+.compose-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.tag-row{display:flex;gap:5px;}
+.tag-opt{padding:4px 9px;border-radius:100px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:11px;cursor:pointer;color:var(--color-text-secondary);}
+.tag-opt.sel{background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;}
+.send-btn{padding:8px 16px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);font-size:13px;cursor:pointer;}
+.sec-hd{font-size:13px;color:var(--color-text-secondary);font-weight:500;margin-bottom:10px;}
+.tab-seg{display:flex;margin-bottom:14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;}
+.seg-btn{flex:1;padding:9px 4px;border:none;background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);}
+.seg-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);font-weight:500;}
+.hist-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;cursor:pointer;}
+.sched-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.refresh-bar{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-bottom:10px;font-size:12px;color:var(--color-text-secondary);}
+.name-input{width:100%;padding:8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;margin-bottom:8px;}
+.session-label-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);}
+.session-label-box strong{display:block;font-size:14px;font-weight:500;color:var(--color-text-primary);margin-top:2px;}
+.dept-skip-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.chk-group{display:flex;gap:12px;}
+.chk-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.chk-col-label{font-size:10px;color:var(--color-text-secondary);white-space:nowrap;font-weight:500;}
+.chk-col input[type=checkbox]{width:18px;height:18px;cursor:pointer;}
+.upload-zone{border:0.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);padding:16px;text-align:center;cursor:pointer;color:var(--color-text-secondary);font-size:13px;display:block;}
+.dongsei-btn{display:flex;align-items:center;gap:8px;padding:12px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;cursor:pointer;width:100%;}
+.dongsei-thumb{width:100%;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);display:block;margin-top:10px;cursor:pointer;}
+.no-upload-msg{font-size:12px;color:var(--color-text-secondary);text-align:center;padding:12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-top:10px;}
+.part-radio{display:flex;margin-bottom:14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;}
+.part-opt{flex:1;padding:10px 4px;border:none;background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);text-align:center;}
+.part-opt.sel{background:var(--color-text-primary);color:var(--color-background-primary);font-weight:500;}
+.tl-edit-block{padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.tl-row1{display:flex;gap:5px;align-items:center;margin-bottom:5px;}
+.tl-row2{display:flex;}
+.inp-time{width:60px;flex:0 0 60px;min-width:0;padding:6px 4px;font-size:12px;text-align:center;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
+.inp-place{width:80px;flex:0 0 80px;min-width:0;padding:6px 5px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
+.inp-title{flex:1 1 0;min-width:0;width:100%;padding:6px 6px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
+.del-btn{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.del-btn:active{background:var(--color-background-secondary);}
+.tl-col-hd{display:flex;gap:5px;padding-bottom:5px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('prog')" id="t-prog"><i class="ti ti-calendar"></i>進行</div>
+  <div class="tab" onclick="showTab('dept')" id="t-dept"><i class="ti ti-school"></i>学科</div>
+  <div class="tab" onclick="showTab('count')" id="t-count"><i class="ti ti-users"></i>来場者</div>
+  <div class="tab" onclick="showTab('board')" id="t-board"><i class="ti ti-speakerphone"></i>連絡板</div>
+  <div class="tab" onclick="showTab('admin')" id="t-admin"><i class="ti ti-settings"></i>管理</div>
+</div>
+
+<div id="sec-prog" class="sec active">
+  <div class="refresh-bar"><i class="ti ti-refresh"></i><span id="prog-refresh">30秒後に更新</span></div>
+  <div id="prog-part-tabs" class="tab-seg">
+    <button class="seg-btn active" onclick="showProgPart('am')" id="ps-am">午前の部</button>
+    <button class="seg-btn" onclick="showProgPart('pm')" id="ps-pm">午後の部</button>
+  </div>
+  <div id="prog-am"></div>
+  <div id="prog-pm" style="display:none;"></div>
+  <div id="prog-dongsei" style="margin-top:16px;"></div>
+</div>
+
+<div id="sec-dept" class="sec">
+  <div class="refresh-bar"><i class="ti ti-refresh"></i><span id="dept-refresh">30秒後に更新</span></div>
+  <div class="tab-seg">
+    <button class="seg-btn active" onclick="showDeptPart('am')" id="ds-am">午前</button>
+    <button class="seg-btn" onclick="showDeptPart('pm')" id="ds-pm">午後</button>
+  </div>
+  <div class="sec-hd" id="dept-summary"></div>
+  <div id="dept-list"></div>
+</div>
+
+<div id="sec-count" class="sec">
+  <div class="refresh-bar"><i class="ti ti-refresh"></i><span id="count-refresh">30秒後に更新</span></div>
+  <div class="tab-seg">
+    <button class="seg-btn active" onclick="showCountPart('am')" id="cs-am">午前の部</button>
+    <button class="seg-btn" onclick="showCountPart('pm')" id="cs-pm">午後の部</button>
+  </div>
+  <div id="count-am-sec">
+    <div class="counter-big"><div class="label">高校生（本人）</div><div class="counter-num" id="am-hs">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('am','hs',-1)">－</button><button class="cbtn plus" onclick="chg('am','hs',1)">＋</button></div></div>
+    <div class="counter-big" style="padding-top:0;"><div class="label">保護者（付き添い）</div><div class="counter-num" id="am-par">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('am','par',-1)">－</button><button class="cbtn plus" onclick="chg('am','par',1)">＋</button></div></div>
+    <div class="stat-grid"><div class="stat"><div class="label">合計（午前）</div><div class="val" id="am-total">0</div></div><div class="stat"><div class="label">高校生：保護者</div><div class="val" id="am-ratio">0:0</div></div></div>
+  </div>
+  <div id="count-pm-sec" style="display:none;">
+    <div class="counter-big"><div class="label">高校生（本人）</div><div class="counter-num" id="pm-hs">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('pm','hs',-1)">－</button><button class="cbtn plus" onclick="chg('pm','hs',1)">＋</button></div></div>
+    <div class="counter-big" style="padding-top:0;"><div class="label">保護者（付き添い）</div><div class="counter-num" id="pm-par">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('pm','par',-1)">－</button><button class="cbtn plus" onclick="chg('pm','par',1)">＋</button></div></div>
+    <div class="stat-grid"><div class="stat"><div class="label">合計（午後）</div><div class="val" id="pm-total">0</div></div><div class="stat"><div class="label">高校生：保護者</div><div class="val" id="pm-ratio">0:0</div></div></div>
+  </div>
+  <div class="stat-grid" style="margin-top:4px;"><div class="stat"><div class="label">本日合計</div><div class="val" id="day-total">0</div></div><div class="stat"><div class="label">高校生合計</div><div class="val" id="day-hs">0</div></div></div>
+</div>
+
+<div id="sec-board" class="sec">
+  <div class="refresh-bar"><i class="ti ti-refresh"></i><span id="board-refresh">30秒後に更新</span></div>
+  <div class="compose">
+    <input class="name-input" id="notice-name" placeholder="発信者名を入力..."/>
+    <textarea id="notice-text" placeholder="スタッフへの連絡事項..." rows="3"></textarea>
+    <div class="compose-foot">
+      <div class="tag-row">
+        <button class="tag-opt" id="tg-urgent" onclick="selTag('urgent')"><i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-1px"></i> 緊急</button>
+        <button class="tag-opt sel" id="tg-info" onclick="selTag('info')"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-1px"></i> 通知</button>
+        <button class="tag-opt" id="tg-complete" onclick="selTag('complete')"><i class="ti ti-check" style="font-size:13px;vertical-align:-1px"></i> 完了</button>
+      </div>
+      <button class="send-btn" onclick="postNotice()">送信</button>
+    </div>
+  </div>
+  <div class="sec-hd">連絡一覧</div>
+  <div id="notices-list"></div>
+</div>
+
+<div id="sec-admin" class="sec">
+  <div class="warn-banner"><i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0;margin-top:1px;"></i><span>この画面は管理用です。過去履歴を表示操作できます。開催日管理・学科設定は運営管理担当者のみ操作してください。</span></div>
+  <div class="tab-seg">
+    <button class="seg-btn active" onclick="showAdminPart('sched')" id="as-sched">開催日</button>
+    <button class="seg-btn" onclick="showAdminPart('dept')" id="as-dept">開催学科</button>
+    <button class="seg-btn" onclick="showAdminPart('tl')" id="as-tl">スケジュール</button>
+    <button class="seg-btn" onclick="showAdminPart('hist')" id="as-hist">過去履歴</button>
+  </div>
+  <div id="admin-sched">
+    <div class="sec-hd">年間開催スケジュール</div>
+    <div id="sched-list"></div>
+    <div class="card" style="margin-top:10px;">
+      <div class="sec-hd" style="margin-bottom:8px;">開催日を追加</div>
+      <input type="date" id="new-date" style="width:100%;padding:8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;margin-bottom:8px;">
+      <input placeholder="メモ（任意）" id="new-memo" style="width:100%;padding:8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;">
+      <button class="btn-primary" onclick="addSched()">追加する</button>
+    </div>
+    <div class="sec-hd" style="margin-top:14px;">当日の開催回操作</div>
+    <div class="card">
+      <div class="label" style="margin-bottom:4px;">現在の開催回</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:12px;color:var(--color-text-primary);" id="current-session-label">未選択</div>
+      <div class="label" style="margin-bottom:6px;">動静表アップロード</div>
+      <label class="upload-zone" for="dongsei-file-input"><i class="ti ti-upload" style="font-size:20px;display:block;margin-bottom:6px;"></i>画像ファイルを選択（JPEG / PNG）</label>
+      <input type="file" id="dongsei-file-input" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="uploadDongsei(this)">
+      <div id="admin-dongsei-preview"></div>
+      <button class="btn-primary" onclick="startSession()" id="btn-start" style="margin-top:12px;">開催開始</button>
+      <button class="btn-outline" onclick="endSession()" id="btn-end" style="display:none;">開催終了・履歴保存</button>
+    </div>
+  </div>
+  <div id="admin-dept" style="display:none;">
+    <div class="session-label-box"><span style="font-size:12px;">対象開催回</span><strong id="dept-session-date">未選択</strong></div>
+    <div class="sec-hd">開催無しの学科にチェックを設定（当日朝までに）</div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-secondary);margin-bottom:4px;"><div></div><div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);text-align:center;">今回対象外</div></div>
+    <div id="admin-dept-list"></div>
+  </div>
+  <div id="admin-tl" style="display:none;">
+    <div class="session-label-box"><span style="font-size:12px;">対象開催回</span><strong id="tl-session-date">未選択</strong></div>
+    <div class="sec-hd">開催区分</div>
+    <div class="part-radio">
+      <button class="part-opt sel" onclick="setPartMode('both')" id="pr-both">午前午後両方</button>
+      <button class="part-opt" onclick="setPartMode('am')" id="pr-am">午前のみ</button>
+      <button class="part-opt" onclick="setPartMode('pm')" id="pr-pm">午後のみ</button>
+    </div>
+    <div id="tl-am-edit">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-hd" style="margin-bottom:0;">午前タイムライン</div>
+        <button class="step-btn" onclick="addTlItem('am')"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 追加</button>
+      </div>
+      <div class="tl-col-hd">
+        <span style="width:60px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">時刻</span>
+        <span style="width:80px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">場所</span>
+        <span style="flex:1;font-size:10px;color:var(--color-text-secondary);">内容</span>
+        <span style="width:28px;flex-shrink:0;"></span>
+      </div>
+      <div id="tl-am-rows"></div>
+    </div>
+    <div id="tl-pm-edit" style="margin-top:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-hd" style="margin-bottom:0;">午後タイムライン</div>
+        <button class="step-btn" onclick="addTlItem('pm')"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 追加</button>
+      </div>
+      <div class="tl-col-hd">
+        <span style="width:60px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">時刻</span>
+        <span style="width:80px;flex-shrink:0;font-size:10px;color:var(--color-text-secondary);">場所</span>
+        <span style="flex:1;font-size:10px;color:var(--color-text-secondary);">内容</span>
+        <span style="width:28px;flex-shrink:0;"></span>
+      </div>
+      <div id="tl-pm-rows"></div>
+    </div>
+    <button class="btn-primary" onclick="saveTl()" style="margin-top:12px;">スケジュールを保存</button>
+  </div>
+  <div id="admin-hist" style="display:none;">
+    <div class="sec-hd">過去の開催履歴</div>
+    <div id="hist-list"></div>
+    <div id="hist-detail" style="display:none;"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const DEPTS=[
+  {code:'CP',name:'プログラム AI×コンピュータ科'},{code:'S',name:'セキュリティネットワーク科'},
+  {code:'G',name:'ゲームクリエイト科'},{code:'D',name:'CADデザイン科'},
+  {code:'W',name:'デジタルコンテンツ科'},{code:'A',name:'グラフィックデザイン科'},
+  {code:'M',name:'メイクブライダル科'},{code:'K',name:'未来こども科'},
+  {code:'CB',name:'ビジネス AI×コンピュータ科'},{code:'I',name:'医療事務科'},
+  {code:'R',name:'国際IT・CAD科'},{code:'T',name:'国際観光ビジネス科'},
+  {code:'F',name:'国際介護福祉科'},
+];
+const DEPT_KEYS=DEPTS.map(d=>d.code);
+const STEPS=['授業中','授業終了','アンケート終了','個別対応中','完了'];
+const STEP_BG=['','#E6F1FB','#EAF3DE','#FAEEDA','#EAF3DE'];
+const STEP_COL=['','#0C447C','#27500A','#633806','#27500A'];
+const STORAGE_KEY='oc-staff-app-v1';
+const DEFAULT_AM=[
+  {time:'8:40',title:'教職員全体打ち合わせ',place:'職員室'},
+  {time:'9:00',title:'お迎え・受付',place:'1F・8F'},
+  {time:'10:00',title:'オープニング・スケジュール紹介',place:'8F大教室'},
+  {time:'10:05',title:'学校概要説明・みらい考房',place:'8F'},
+  {time:'10:15',title:'各教室へ移動',place:''},
+  {time:'10:25',title:'体験授業 / 保護者説明会',place:'各教室・8F'},
+  {time:'11:15',title:'休憩',place:''},
+  {time:'11:25',title:'学科・AO入試説明',place:'各教室'},
+  {time:'11:45',title:'アンケート記入・質疑応答',place:'各教室'},
+  {time:'11:45',title:'個別相談（8Fラウンジ4ブース）',place:'8Fラウンジ'},
+  {time:'11:45',title:'キャンパスツアー',place:'12F〜'},
+];
+const DEFAULT_PM=[
+  {time:'12:45',title:'受付・誘導・実習準備',place:'1F・8F'},
+  {time:'13:00',title:'お迎え',place:'8F'},
+  {time:'13:30',title:'オープニング・スケジュール紹介',place:'8F大教室'},
+  {time:'13:35',title:'学校概要説明・みらい考房',place:'8F'},
+  {time:'13:45',title:'各教室へ移動',place:''},
+  {time:'13:55',title:'体験授業 / 保護者説明会',place:'各教室・8F'},
+  {time:'14:45',title:'休憩',place:''},
+  {time:'14:55',title:'学科・AO入試説明',place:'各教室'},
+  {time:'15:15',title:'アンケート記入・質疑応答',place:'各教室'},
+  {time:'15:15',title:'個別相談（8Fラウンジ4ブース）',place:'8Fラウンジ'},
+  {time:'15:15',title:'キャンパスツアー',place:'12F〜'},
+];
+
+let state={depts:{},count:{am:{hs:0,par:0},pm:{hs:0,par:0}},notices:[],schedules:[],
+  session:{active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:''},
+  history:[],deptPart:'am'};
+let noticeTag='info';
+let editAmTl=[],editPmTl=[];
+
+function newDP(){return{step:0,hs:0,par:0,consult:0,tour:0,doneTime:''};}
+function cloneTl(tl){return JSON.parse(JSON.stringify(tl));}
+
+function loadState(){
+  try{const s=localStorage.getItem(STORAGE_KEY);if(s)Object.assign(state,JSON.parse(s));}catch(e){}
+  initDepts();renderAll();
+}
+function saveState(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){console.warn('保存エラー',e);}
+}
+
+function initDepts(){
+  DEPT_KEYS.forEach(k=>{
+    if(!state.depts[k])state.depts[k]={skipAm:false,skipPm:false,am:newDP(),pm:newDP()};
+    if(state.depts[k].skip!==undefined){state.depts[k].skipAm=state.depts[k].skip;state.depts[k].skipPm=state.depts[k].skip;delete state.depts[k].skip;}
+  });
+  if(!state.session.amTl)state.session.amTl=cloneTl(DEFAULT_AM);
+  if(!state.session.pmTl)state.session.pmTl=cloneTl(DEFAULT_PM);
+  if(!state.session.partMode)state.session.partMode='both';
+  if(state.session.dongseiUrl===undefined)state.session.dongseiUrl='';
+}
+
+function getNow(){const n=new Date();return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
+function formatDate(d){if(!d)return'';const dt=new Date(d+'T00:00:00');return`${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`;}
+function getCurrentPhase(tl){const n=new Date(),hm=n.getHours()*60+n.getMinutes();let cur=-1;tl.forEach((item,i)=>{const p=item.time.split(':');if(p.length===2&&hm>=parseInt(p[0])*60+parseInt(p[1]))cur=i;});return cur;}
+
+function renderTimeline(tl,id){
+  const cur=getCurrentPhase(tl);
+  document.getElementById(id).innerHTML=tl.map((item,i)=>`
+    <div class="timeline-item${i===cur?' tl-now':''}">
+      <div class="tl-time">${item.time}</div>
+      <div class="tl-body">
+        <div class="tl-title">${item.title}${i===cur?' <span class="badge badge-active">進行中</span>':''}</div>
+        ${item.place?`<div class="tl-sub">${item.place}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderProgDongsei(){
+  const du=state.session.dongseiUrl;
+  document.getElementById('prog-dongsei').innerHTML=`
+    <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:14px;">
+      <div class="sec-hd">動静表</div>
+      <button class="dongsei-btn" onclick="openDongsei()" ${!du?'style="opacity:0.45;cursor:default;"':''}>
+        <i class="ti ti-file-description" style="font-size:20px;"></i>
+        <span>動静表を開く（別タブ）</span>
+        <i class="ti ti-external-link" style="font-size:16px;margin-left:auto;"></i>
+      </button>
+      ${du?`<img src="${du}" class="dongsei-thumb" onclick="openDongsei()" alt="動静表">`
+          :`<div class="no-upload-msg"><i class="ti ti-photo-off" style="font-size:15px;vertical-align:-2px;margin-right:4px;"></i>未アップロード</div>`}
+    </div>`;
+}
+
+function renderProgTab(){
+  const pm=state.session.partMode||'both';
+  const showAm=pm==='both'||pm==='am',showPm=pm==='both'||pm==='pm';
+  document.getElementById('ps-am').style.display=showAm?'':'none';
+  document.getElementById('ps-pm').style.display=showPm?'':'none';
+  if(showAm)renderTimeline(state.session.amTl||DEFAULT_AM,'prog-am');
+  if(showPm)renderTimeline(state.session.pmTl||DEFAULT_PM,'prog-pm');
+  if(pm==='pm'){document.getElementById('prog-am').style.display='none';document.getElementById('prog-pm').style.display='block';document.getElementById('ps-pm').classList.add('active');document.getElementById('ps-am').classList.remove('active');}
+  else{document.getElementById('prog-am').style.display='block';document.getElementById('prog-pm').style.display='none';document.getElementById('ps-am').classList.add('active');document.getElementById('ps-pm').classList.remove('active');}
+  renderProgDongsei();
+}
+function showProgPart(p){
+  if(p==='am')renderTimeline(state.session.amTl||DEFAULT_AM,'prog-am');
+  if(p==='pm')renderTimeline(state.session.pmTl||DEFAULT_PM,'prog-pm');
+  document.getElementById('prog-am').style.display=p==='am'?'block':'none';
+  document.getElementById('prog-pm').style.display=p==='pm'?'block':'none';
+  document.getElementById('ps-am').classList.toggle('active',p==='am');
+  document.getElementById('ps-pm').classList.toggle('active',p==='pm');
+}
+function openDongsei(){const url=state.session.dongseiUrl;if(!url)return;const w=window.open('','_blank');w.document.write(`<html><body style="margin:0;background:#111;"><img src="${url}" style="max-width:100%;height:auto;display:block;"></body></html>`);w.document.close();}
+function uploadDongsei(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>4.5*1024*1024){alert('4.5MB以下の画像にしてください');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{state.session.dongseiUrl=e.target.result;saveState();renderAdminDongseiPreview();renderProgDongsei();};
+  reader.onerror=()=>alert('読み込み失敗');
+  reader.readAsDataURL(file);input.value='';
+}
+function renderAdminDongseiPreview(){
+  const du=state.session.dongseiUrl;
+  document.getElementById('admin-dongsei-preview').innerHTML=du?`
+    <div style="margin-top:10px;">
+      <img src="${du}" class="dongsei-thumb" onclick="openDongsei()" alt="動静表プレビュー">
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <i class="ti ti-check" style="font-size:14px;color:#27500A;"></i>
+        <span style="font-size:12px;color:var(--color-text-secondary);flex:1;">アップロード済み（タップで拡大）</span>
+        <label for="dongsei-file-input" style="font-size:12px;color:#0C447C;cursor:pointer;padding:4px 8px;border:0.5px solid #B5D4F4;border-radius:var(--border-radius-md);">再アップロード</label>
+      </div>
+    </div>`:'';
+}
+
+function isSkip(code,part){return part==='am'?state.depts[code].skipAm:state.depts[code].skipPm;}
+function renderDepts(){
+  const part=state.deptPart;
+  const active=DEPTS.filter(d=>!isSkip(d.code,part));
+  const done=active.filter(d=>state.depts[d.code][part].step===4).length;
+  document.getElementById('dept-summary').textContent=`対象 ${active.length}学科 ／ 完了 ${done}科 ／ 進行中 ${active.length-done}科`;
+  document.getElementById('dept-list').innerHTML=DEPTS.map(d=>{
+    const ds=state.depts[d.code],dp=ds[part],skip=isSkip(d.code,part),step=dp.step;
+    const badge=skip?'<span class="badge badge-skip">今回対象外</span>':step===0?'<span class="badge badge-active">授業中</span>':step===4?'<span class="badge badge-done">完了</span>':`<span class="badge" style="background:${STEP_BG[step]};color:${STEP_COL[step]};">${STEPS[step]}</span>`;
+    const inputHtml=(!skip&&step===1)?`<div class="input-row"><div class="input-group"><label>高校生</label><input type="number" min="0" value="${dp.hs}" onchange="setNum('${d.code}','${part}','hs',this.value)"></div><div class="input-group"><label>保護者</label><input type="number" min="0" value="${dp.par}" onchange="setNum('${d.code}','${part}','par',this.value)"></div><div class="input-group"><label>個別相談希望</label><input type="number" min="0" value="${dp.consult}" onchange="setNum('${d.code}','${part}','consult',this.value)"></div><div class="input-group"><label>ツアー希望</label><input type="number" min="0" value="${dp.tour}" onchange="setNum('${d.code}','${part}','tour',this.value)"></div></div>`:'';
+    const stepBtn=(!skip&&step<4)?`<div class="step-btns"><button class="step-btn current" onclick="advanceDept('${d.code}','${part}')">${STEPS[step+1]}へ進む <i class="ti ti-arrow-right" style="font-size:12px"></i></button></div>`:'';
+    const info=(!skip&&step>=1)?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">高校生 ${dp.hs}名 保護者 ${dp.par}名 ／ 相談 ${dp.consult}名 ツアー ${dp.tour}名${dp.doneTime?' ／ 完了 '+dp.doneTime:''}</div>`:'';
+    return`<div class="dept-card"><div class="dept-header"><div class="dept-name">${d.code}：${d.name}</div>${badge}</div>${info}${inputHtml}${stepBtn}</div>`;
+  }).join('');
+}
+function advanceDept(code,part){const dp=state.depts[code][part];if(dp.step<4){dp.step++;if(dp.step===4)dp.doneTime=getNow();}saveState();renderDepts();}
+function setNum(code,part,key,val){state.depts[code][part][key]=Math.max(0,parseInt(val)||0);saveState();}
+function chg(part,type,delta){state.count[part][type]=Math.max(0,state.count[part][type]+delta);saveState();renderCount();}
+function renderCount(){
+  ['am','pm'].forEach(p=>{const hs=state.count[p].hs,par=state.count[p].par;document.getElementById(`${p}-hs`).textContent=hs;document.getElementById(`${p}-par`).textContent=par;document.getElementById(`${p}-total`).textContent=hs+par;document.getElementById(`${p}-ratio`).textContent=`${hs}:${par}`;});
+  const tHs=state.count.am.hs+state.count.pm.hs,tPar=state.count.am.par+state.count.pm.par;
+  document.getElementById('day-total').textContent=tHs+tPar;document.getElementById('day-hs').textContent=tHs;
+}
+function selTag(t){noticeTag=t;['urgent','info','complete'].forEach(x=>document.getElementById('tg-'+x).classList.toggle('sel',x===t));}
+function postNotice(){
+  const name=(document.getElementById('notice-name').value||'').trim()||'名前未入力';
+  const text=(document.getElementById('notice-text').value||'').trim();
+  if(!text)return;
+  state.notices.unshift({author:name,text,tag:noticeTag,time:getNow()});
+  document.getElementById('notice-text').value='';saveState();renderNotices();
+}
+function renderNotices(){
+  const tMap={urgent:'badge-urgent',info:'badge-info',complete:'badge-complete'};
+  const tLabel={urgent:'緊急',info:'通知',complete:'完了'};
+  document.getElementById('notices-list').innerHTML=state.notices.map(n=>`
+    <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${n.author}</span><span style="font-size:12px;color:var(--color-text-secondary);">${n.time}</span></div>
+      <div style="font-size:14px;line-height:1.6;color:var(--color-text-primary);">${n.text}</div>
+      <span class="badge ${tMap[n.tag]||'badge-info'}" style="margin-top:6px;">${tLabel[n.tag]||'通知'}</span>
+    </div>`).join('')||'<div style="font-size:13px;color:var(--color-text-secondary);padding:12px 0;">まだ投稿はありません</div>';
+}
+function addSched(){
+  const d=document.getElementById('new-date').value,m=document.getElementById('new-memo').value;
+  if(!d)return;
+  if(state.schedules.find(s=>s.date===d)){alert('同じ日付が既に登録されています');return;}
+  state.schedules.push({date:d,memo:m,id:'s'+Date.now(),partMode:'both',amTl:cloneTl(DEFAULT_AM),pmTl:cloneTl(DEFAULT_PM)});
+  state.schedules.sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById('new-date').value='';document.getElementById('new-memo').value='';
+  saveState();renderAdmin();
+}
+function delSched(id){if(!confirm('この開催日を削除しますか？'))return;state.schedules=state.schedules.filter(s=>s.id!==id);saveState();renderAdmin();}
+function selectSession(id){
+  const s=state.schedules.find(x=>x.id===id);if(!s)return;
+  state.session.date=s.date;state.session.id=id;
+  state.session.partMode=s.partMode||'both';
+  state.session.amTl=s.amTl?cloneTl(s.amTl):cloneTl(DEFAULT_AM);
+  state.session.pmTl=s.pmTl?cloneTl(s.pmTl):cloneTl(DEFAULT_PM);
+  saveState();renderAdmin();renderProgTab();
+}
+function startSession(){
+  if(!state.session.id){alert('開催日を選択してください');return;}
+  if(!confirm('開催を開始しますか？当日のデータがリセットされます。'))return;
+  state.session.active=true;
+  DEPT_KEYS.forEach(k=>{state.depts[k].am=newDP();state.depts[k].pm=newDP();});
+  state.count={am:{hs:0,par:0},pm:{hs:0,par:0}};state.notices=[];
+  saveState();renderAll();
+}
+function endSession(){
+  if(!confirm('開催を終了して履歴に保存しますか？'))return;
+  state.history.unshift({date:state.session.date,id:'h'+Date.now(),count:JSON.parse(JSON.stringify(state.count)),depts:JSON.parse(JSON.stringify(state.depts)),notices:JSON.parse(JSON.stringify(state.notices)),partMode:state.session.partMode});
+  state.session.active=false;saveState();renderAll();
+}
+function setPartMode(m){
+  state.session.partMode=m;
+  ['both','am','pm'].forEach(x=>document.getElementById('pr-'+x).classList.toggle('sel',x===m));
+  document.getElementById('tl-am-edit').style.display=(m==='pm')?'none':'block';
+  document.getElementById('tl-pm-edit').style.display=(m==='am')?'none':'block';
+  const sel=state.schedules.find(x=>x.id===state.session.id);if(sel)sel.partMode=m;
+  saveState();renderProgTab();
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function liveEdit(part,i,key,val){const arr=part==='am'?editAmTl:editPmTl;if(arr[i])arr[i][key]=val;}
+function renderTlRows(part){
+  const arr=part==='am'?editAmTl:editPmTl;
+  document.getElementById(`tl-${part}-rows`).innerHTML=arr.map((item,i)=>`
+    <div class="tl-edit-block">
+      <div class="tl-row1">
+        <input class="inp-time" type="text" value="${escHtml(item.time||'')}" placeholder="10:00" oninput="liveEdit('${part}',${i},'time',this.value)">
+        <input class="inp-place" type="text" value="${escHtml(item.place||'')}" placeholder="場所" oninput="liveEdit('${part}',${i},'place',this.value)">
+        <button class="del-btn" onclick="delTlItem('${part}',${i})"><i class="ti ti-x" style="font-size:13px;"></i></button>
+      </div>
+      <div class="tl-row2">
+        <input class="inp-title" type="text" value="${escHtml(item.title||'')}" placeholder="内容を入力" oninput="liveEdit('${part}',${i},'title',this.value)">
+      </div>
+    </div>`).join('');
+}
+function delTlItem(part,i){if(part==='am')editAmTl.splice(i,1);else editPmTl.splice(i,1);renderTlRows(part);}
+function addTlItem(part){if(part==='am')editAmTl.push({time:'',title:'',place:''});else editPmTl.push({time:'',title:'',place:''});renderTlRows(part);}
+function saveTl(){
+  state.session.amTl=cloneTl(editAmTl);state.session.pmTl=cloneTl(editPmTl);
+  const sel=state.schedules.find(x=>x.id===state.session.id);
+  if(sel){sel.amTl=cloneTl(editAmTl);sel.pmTl=cloneTl(editPmTl);}
+  saveState();renderProgTab();alert('スケジュールを保存しました');
+}
+function toggleSkipAm(code,val){state.depts[code].skipAm=val;saveState();renderDepts();}
+function toggleSkipPm(code,val){state.depts[code].skipPm=val;saveState();renderDepts();}
+function renderAdmin(){
+  document.getElementById('sched-list').innerHTML=state.schedules.length?state.schedules.map(s=>`
+    <div class="sched-item">
+      <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(s.date)}</div>${s.memo?`<div style="font-size:12px;color:var(--color-text-secondary);">${s.memo}</div>`:''}</div>
+      <div style="display:flex;gap:6px;"><button class="step-btn" onclick="selectSession('${s.id}')">選択</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;">削除</button></div>
+    </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">開催日が登録されていません</div>';
+  const selSched=state.session.id?state.schedules.find(x=>x.id===state.session.id):null;
+  const selLabel=selSched?formatDate(selSched.date)+(selSched.memo?' — '+selSched.memo:''):'未選択';
+  document.getElementById('current-session-label').textContent=selLabel;
+  document.getElementById('btn-start').style.display=state.session.active?'none':'block';
+  document.getElementById('btn-end').style.display=state.session.active?'block':'none';
+  renderAdminDongseiPreview();
+  document.getElementById('dept-session-date').textContent=selLabel;
+  document.getElementById('tl-session-date').textContent=selLabel;
+  const pm=state.session.partMode||'both';
+  ['both','am','pm'].forEach(x=>document.getElementById('pr-'+x).classList.toggle('sel',x===pm));
+  document.getElementById('tl-am-edit').style.display=(pm==='pm')?'none':'block';
+  document.getElementById('tl-pm-edit').style.display=(pm==='am')?'none':'block';
+  editAmTl=cloneTl(state.session.amTl||DEFAULT_AM);
+  editPmTl=cloneTl(state.session.pmTl||DEFAULT_PM);
+  renderTlRows('am');renderTlRows('pm');
+  document.getElementById('admin-dept-list').innerHTML=DEPTS.map(d=>`
+    <div class="dept-skip-row">
+      <div style="font-size:13px;font-weight:500;line-height:1.4;color:var(--color-text-primary);">${d.code}：${d.name}</div>
+      <div class="chk-group">
+        <div class="chk-col"><div class="chk-col-label">午前</div><input type="checkbox" ${state.depts[d.code]&&state.depts[d.code].skipAm?'checked':''} onchange="toggleSkipAm('${d.code}',this.checked)"></div>
+        <div class="chk-col"><div class="chk-col-label">午後</div><input type="checkbox" ${state.depts[d.code]&&state.depts[d.code].skipPm?'checked':''} onchange="toggleSkipPm('${d.code}',this.checked)"></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('hist-list').innerHTML=state.history.length?state.history.map((h,i)=>`
+    <div class="hist-item" onclick="showHistDetail(${i})">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(h.date)}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${h.count.am.hs+h.count.pm.hs}名 保護者 ${h.count.am.par+h.count.pm.par}名 合計 ${h.count.am.hs+h.count.am.par+h.count.pm.hs+h.count.pm.par}名</div>
+    </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>';
+}
+function showHistDetail(i){
+  const h=state.history[i];const tLabel={urgent:'緊急',info:'通知',complete:'完了'};
+  const deptRows=DEPTS.filter(d=>h.depts[d.code]).map(d=>{
+    const am=h.depts[d.code].am,pm=h.depts[d.code].pm,sAm=h.depts[d.code].skipAm,sPm=h.depts[d.code].skipPm;
+    return`<div style="padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);">午前: ${sAm?'対象外':STEPS[am.step]+(am.doneTime?' 完了'+am.doneTime:'')+' 高'+am.hs+'名 保'+am.par+'名 相談'+am.consult+' ツアー'+am.tour}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);">午後: ${sPm?'対象外':STEPS[pm.step]+(pm.doneTime?' 完了'+pm.doneTime:'')+' 高'+pm.hs+'名 保'+pm.par+'名 相談'+pm.consult+' ツアー'+pm.tour}</div>
+    </div>`;}).join('');
+  const noticeRows=h.notices.map(n=>`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);"><span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${n.author}</span> <span style="font-size:11px;color:var(--color-text-secondary);">${n.time} [${tLabel[n.tag]||'通知'}]</span><div style="font-size:13px;color:var(--color-text-primary);">${n.text}</div></div>`).join('');
+  document.getElementById('hist-detail').style.display='block';
+  document.getElementById('hist-detail').innerHTML=`
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary);">${formatDate(h.date)} 詳細</div>
+      <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 合計</div><div class="val">${h.count.am.hs+h.count.am.par}</div></div><div class="stat"><div class="label">午後 合計</div><div class="val">${h.count.pm.hs+h.count.pm.par}</div></div></div>
+      <div class="sec-hd">学科別記録</div>${deptRows}
+      ${h.notices.length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
+      <button class="btn-outline" onclick="document.getElementById('hist-detail').style.display='none'" style="margin-top:10px;">閉じる</button>
+    </div>`;
+}
+function showTab(name){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('t-'+name).classList.add('active');}
+function showDeptPart(p){state.deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();}
+function showCountPart(p){document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');}
+function showAdminPart(p){['sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';}
+function renderAll(){renderProgTab();renderDepts();renderCount();renderNotices();renderAdmin();}
+
+/* 30秒ごとにlocalStorageから再読み込み（同端末の別タブ対応） */
+let countdown=30;
+function tick(){
+  countdown--;
+  if(countdown<=0){countdown=30;loadState();}
+  ['prog','dept','count','board'].forEach(id=>{const el=document.getElementById(id+'-refresh');if(el)el.textContent=`${countdown}秒後に更新`;});
+}
+loadState();
+setInterval(tick,1000);
+</script>
+</body>
+</html>
