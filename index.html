@@ -120,6 +120,20 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 .inp-title{flex:1 1 0;min-width:0;width:100%;padding:6px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);}
 .del-btn{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:0.5px solid #EF9F27;background:transparent;color:#633806;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .tl-col-hd{display:flex;gap:5px;padding-bottom:5px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:3px;}
+/* カウンター直接入力 */
+.counter-input{font-size:56px;font-weight:500;line-height:1;color:var(--color-text-primary);width:120px;border:none;background:transparent;text-align:center;outline:none;-moz-appearance:textfield;}
+.counter-input::-webkit-outer-spin-button,.counter-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+/* 予約人数表示 */
+.reservation-display{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;padding:8px 4px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);}
+.reservation-display .rv-label{font-size:10px;color:var(--color-text-secondary);margin-bottom:2px;}
+.reservation-display .rv-val{font-size:22px;font-weight:500;color:var(--color-text-primary);}
+/* 集計表 */
+.summary-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.summary-table th,.summary-table td{padding:7px 6px;text-align:center;font-size:13px;border-bottom:0.5px solid var(--color-border-tertiary);}
+.summary-table th{font-size:11px;color:var(--color-text-secondary);font-weight:500;background:var(--color-background-secondary);}
+.summary-table td:first-child{text-align:left;font-size:12px;color:var(--color-text-secondary);}
+.summary-table td.total-col{font-weight:500;color:var(--color-text-primary);}
+.summary-table tr:last-child td{font-weight:600;color:var(--color-text-primary);border-bottom:none;}
 </style>
 </head>
 <body>
@@ -160,17 +174,112 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
     <button class="seg-btn active" onclick="showCountPart('am')" id="cs-am">午前の部</button>
     <button class="seg-btn" onclick="showCountPart('pm')" id="cs-pm">午後の部</button>
   </div>
+
+  <!-- 午前の部 -->
   <div id="count-am-sec">
-    <div class="counter-big"><div class="label">高校生（本人）</div><div class="counter-num" id="am-hs">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('am','hs',-1)">－</button><button class="cbtn plus" onclick="chg('am','hs',1)">＋</button></div></div>
-    <div class="counter-big" style="padding-top:0;"><div class="label">保護者（付き添い）</div><div class="counter-num" id="am-par">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('am','par',-1)">－</button><button class="cbtn plus" onclick="chg('am','par',1)">＋</button></div></div>
-    <div class="stat-grid"><div class="stat"><div class="label">合計（午前）</div><div class="val" id="am-total">0</div></div><div class="stat"><div class="label">高校生：保護者</div><div class="val" id="am-ratio">0:0</div></div></div>
+    <!-- 高校生カウンター（左：予約人数表示 / 右：カウンター） -->
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 0 8px;">
+      <div class="reservation-display">
+        <div class="rv-label">予約</div>
+        <div class="rv-val" id="rv-am-part-disp">0</div>
+        <div class="rv-label">名</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div class="label" style="margin-bottom:6px;">高校生（本人）</div>
+        <input class="counter-input" type="number" min="0" id="am-hs" value="0"
+          oninput="chgDirect('am','hs',this.value)">
+        <div class="counter-btns">
+          <button class="cbtn" onclick="chg('am','hs',-1)">－</button>
+          <button class="cbtn plus" onclick="chg('am','hs',1)">＋</button>
+        </div>
+      </div>
+    </div>
+    <!-- 保護者カウンター -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px;">
+      <div class="reservation-display">
+        <div class="rv-label">予約</div>
+        <div class="rv-val" id="rv-am-guardian-disp">0</div>
+        <div class="rv-label">名</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div class="label" style="margin-bottom:6px;">保護者（付き添い）</div>
+        <input class="counter-input" type="number" min="0" id="am-par" value="0"
+          oninput="chgDirect('am','par',this.value)">
+        <div class="counter-btns">
+          <button class="cbtn" onclick="chg('am','par',-1)">－</button>
+          <button class="cbtn plus" onclick="chg('am','par',1)">＋</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- 午後の部 -->
   <div id="count-pm-sec" style="display:none;">
-    <div class="counter-big"><div class="label">高校生（本人）</div><div class="counter-num" id="pm-hs">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('pm','hs',-1)">－</button><button class="cbtn plus" onclick="chg('pm','hs',1)">＋</button></div></div>
-    <div class="counter-big" style="padding-top:0;"><div class="label">保護者（付き添い）</div><div class="counter-num" id="pm-par">0</div><div class="counter-btns"><button class="cbtn" onclick="chg('pm','par',-1)">－</button><button class="cbtn plus" onclick="chg('pm','par',1)">＋</button></div></div>
-    <div class="stat-grid"><div class="stat"><div class="label">合計（午後）</div><div class="val" id="pm-total">0</div></div><div class="stat"><div class="label">高校生：保護者</div><div class="val" id="pm-ratio">0:0</div></div></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 0 8px;">
+      <div class="reservation-display">
+        <div class="rv-label">予約</div>
+        <div class="rv-val" id="rv-pm-part-disp">0</div>
+        <div class="rv-label">名</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div class="label" style="margin-bottom:6px;">高校生（本人）</div>
+        <input class="counter-input" type="number" min="0" id="pm-hs" value="0"
+          oninput="chgDirect('pm','hs',this.value)">
+        <div class="counter-btns">
+          <button class="cbtn" onclick="chg('pm','hs',-1)">－</button>
+          <button class="cbtn plus" onclick="chg('pm','hs',1)">＋</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px;">
+      <div class="reservation-display">
+        <div class="rv-label">予約</div>
+        <div class="rv-val" id="rv-pm-guardian-disp">0</div>
+        <div class="rv-label">名</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div class="label" style="margin-bottom:6px;">保護者（付き添い）</div>
+        <input class="counter-input" type="number" min="0" id="pm-par" value="0"
+          oninput="chgDirect('pm','par',this.value)">
+        <div class="counter-btns">
+          <button class="cbtn" onclick="chg('pm','par',-1)">－</button>
+          <button class="cbtn plus" onclick="chg('pm','par',1)">＋</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="stat-grid" style="margin-top:4px;"><div class="stat"><div class="label">本日合計</div><div class="val" id="day-total">0</div></div><div class="stat"><div class="label">高校生合計</div><div class="val" id="day-hs">0</div></div></div>
+
+  <!-- 集計表（常時表示） -->
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>高校生</th>
+        <th>保護者</th>
+        <th>動員合計</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>午前の部</td>
+        <td id="sum-am-hs">0</td>
+        <td id="sum-am-par">0</td>
+        <td class="total-col" id="sum-am-total">0</td>
+      </tr>
+      <tr>
+        <td>午後の部</td>
+        <td id="sum-pm-hs">0</td>
+        <td id="sum-pm-par">0</td>
+        <td class="total-col" id="sum-pm-total">0</td>
+      </tr>
+      <tr>
+        <td>本日合計</td>
+        <td id="sum-day-hs">0</td>
+        <td id="sum-day-par">0</td>
+        <td class="total-col" id="sum-day-total">0</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <div id="sec-board" class="sec">
@@ -211,6 +320,43 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
     <div class="card">
       <div class="label" style="margin-bottom:4px;">現在の開催回</div>
       <div style="font-size:15px;font-weight:500;margin-bottom:12px;color:var(--color-text-primary);" id="current-session-label">未選択</div>
+      <div class="label" style="margin-bottom:8px;margin-top:4px;font-weight:500;font-size:13px;color:var(--color-text-primary);">予約人数</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;">午前の部</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午前参加人数</label>
+              <input type="number" min="0" max="999" id="rv-am-part"
+                style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
+                onchange="saveReservation()">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午前保護者等</label>
+              <input type="number" min="0" max="999" id="rv-am-guardian"
+                style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
+                onchange="saveReservation()">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;">午後の部</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午後参加人数</label>
+              <input type="number" min="0" max="999" id="rv-pm-part"
+                style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
+                onchange="saveReservation()">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午後保護者等</label>
+              <input type="number" min="0" max="999" id="rv-pm-guardian"
+                style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
+                onchange="saveReservation()">
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="label" style="margin-bottom:6px;">動静表アップロード</div>
       <label class="upload-zone" for="dongsei-file-input"><i class="ti ti-upload" style="font-size:20px;display:block;margin-bottom:6px;"></i>画像ファイルを選択（JPEG / PNG）</label>
       <input type="file" id="dongsei-file-input" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="uploadDongsei(this)">
@@ -333,7 +479,8 @@ let state = {
   count: {am:{hs:0,par:0}, pm:{hs:0,par:0}},
   notices: [],
   schedules: [],
-  session: {active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:''},
+  session: {active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:'',
+    reservation:{amPart:0,amGuardian:0,pmPart:0,pmGuardian:0}},
   history: []
 };
 let deptPart='am';
@@ -399,6 +546,13 @@ function ensureDefaults() {
   if (!state.session.pmTl) state.session.pmTl = clone(DEFAULT_PM);
   if (!state.session.partMode) state.session.partMode = 'both';
   if (!state.session.dongseiUrl) state.session.dongseiUrl = '';
+  if (!state.session.reservation || typeof state.session.reservation !== 'object')
+    state.session.reservation = {amPart:0, amGuardian:0, pmPart:0, pmGuardian:0};
+  const rv = state.session.reservation;
+  if (rv.amPart === undefined) rv.amPart = 0;
+  if (rv.amGuardian === undefined) rv.amGuardian = 0;
+  if (rv.pmPart === undefined) rv.pmPart = 0;
+  if (rv.pmGuardian === undefined) rv.pmGuardian = 0;
 
   // 配列
   if (!Array.isArray(state.notices)) state.notices = [];
@@ -547,17 +701,31 @@ function renderDepts(){
 }
 
 function renderCount(){
+  const amHs=state.count.am.hs||0, amPar=state.count.am.par||0;
+  const pmHs=state.count.pm.hs||0, pmPar=state.count.pm.par||0;
+  const tHs=amHs+pmHs, tPar=amPar+pmPar;
+
+  // カウンター入力欄の値更新（フォーカス中は上書きしない）
   ['am','pm'].forEach(p=>{
     const hs=state.count[p].hs||0, par=state.count[p].par||0;
-    document.getElementById(`${p}-hs`).textContent=hs;
-    document.getElementById(`${p}-par`).textContent=par;
-    document.getElementById(`${p}-total`).textContent=hs+par;
-    document.getElementById(`${p}-ratio`).textContent=`${hs}:${par}`;
+    const hsEl=document.getElementById(`${p}-hs`);
+    const parEl=document.getElementById(`${p}-par`);
+    if(hsEl && document.activeElement!==hsEl) hsEl.value=hs;
+    if(parEl && document.activeElement!==parEl) parEl.value=par;
   });
-  const tHs=(state.count.am.hs||0)+(state.count.pm.hs||0);
-  const tPar=(state.count.am.par||0)+(state.count.pm.par||0);
-  document.getElementById('day-total').textContent=tHs+tPar;
-  document.getElementById('day-hs').textContent=tHs;
+
+  // 集計表
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('sum-am-hs',amHs); set('sum-am-par',amPar); set('sum-am-total',amHs+amPar);
+  set('sum-pm-hs',pmHs); set('sum-pm-par',pmPar); set('sum-pm-total',pmHs+pmPar);
+  set('sum-day-hs',tHs); set('sum-day-par',tPar); set('sum-day-total',tHs+tPar);
+
+  // 予約人数表示
+  const rv=state.session.reservation||{amPart:0,amGuardian:0,pmPart:0,pmGuardian:0};
+  set('rv-am-part-disp',rv.amPart||0);
+  set('rv-am-guardian-disp',rv.amGuardian||0);
+  set('rv-pm-part-disp',rv.pmPart||0);
+  set('rv-pm-guardian-disp',rv.pmGuardian||0);
 }
 
 function renderNotices(){
@@ -602,13 +770,23 @@ function renderAdmin(){
   document.getElementById('sched-list').innerHTML=schedules.length?schedules.map(s=>`
     <div class="sched-item">
       <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(s.date)}</div>${s.memo?`<div style="font-size:12px;color:var(--color-text-secondary);">${s.memo}</div>`:''}</div>
-      <div style="display:flex;gap:6px;"><button class="step-btn" onclick="selectSession('${s.id}')">選択</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;">削除</button></div>
+      <div style="display:flex;gap:6px;"><button class="step-btn" onclick="selectSession('${s.id}')">選択</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;border-color:#EF9F27;">削除</button></div>
     </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">開催日が登録されていません</div>';
   const selSched=state.session.id?schedules.find(x=>x.id===state.session.id):null;
   const selLabel=selSched?formatDate(selSched.date)+(selSched.memo?' — '+selSched.memo:''):'未選択';
   document.getElementById('current-session-label').textContent=selLabel;
   document.getElementById('btn-start').style.display=state.session.active?'none':'block';
   document.getElementById('btn-end').style.display=state.session.active?'block':'none';
+  // 予約人数フィールドに値をセット
+  const rv=state.session.reservation||{amPart:0,amGuardian:0,pmPart:0,pmGuardian:0};
+  const rvAp=document.getElementById('rv-am-part');
+  const rvAg=document.getElementById('rv-am-guardian');
+  const rvPp=document.getElementById('rv-pm-part');
+  const rvPg=document.getElementById('rv-pm-guardian');
+  if(rvAp)rvAp.value=rv.amPart||0;
+  if(rvAg)rvAg.value=rv.amGuardian||0;
+  if(rvPp)rvPp.value=rv.pmPart||0;
+  if(rvPg)rvPg.value=rv.pmGuardian||0;
   renderAdminDongseiPreview();
   document.getElementById('dept-session-date').textContent=selLabel;
   document.getElementById('tl-session-date').textContent=selLabel;
@@ -671,6 +849,14 @@ window.showProgPart=p=>{
   document.getElementById('ps-am').classList.toggle('active',p==='am');
   document.getElementById('ps-pm').classList.toggle('active',p==='pm');
 };
+window.saveReservation=()=>{
+  const rv=state.session.reservation;
+  rv.amPart=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-am-part').value)||0));
+  rv.amGuardian=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-am-guardian').value)||0));
+  rv.pmPart=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-part').value)||0));
+  rv.pmGuardian=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-guardian').value)||0));
+  saveState();
+};
 window.openDongsei=()=>{
   const url=state.session.dongseiUrl;if(!url)return;
   const w=window.open('','_blank');
@@ -698,7 +884,16 @@ window.backDept=(code,part)=>{
   saveState();
 };
 window.setNum=(code,part,key,val)=>{state.depts[code][part][key]=Math.max(0,parseInt(val)||0);saveState();};
-window.chg=(part,type,delta)=>{state.count[part][type]=Math.max(0,(state.count[part][type]||0)+delta);saveState();};
+window.chg=(part,type,delta)=>{
+  state.count[part][type]=Math.max(0,(state.count[part][type]||0)+delta);
+  saveState();
+};
+window.chgDirect=(part,type,val)=>{
+  const n=parseInt(val);
+  if(isNaN(n)||n<0) return;
+  state.count[part][type]=n;
+  saveState();
+};
 window.selTag=t=>{noticeTag=t;['urgent','info','complete'].forEach(x=>document.getElementById('tg-'+x).classList.toggle('sel',x===t));};
 window.postNotice=()=>{
   const name=(document.getElementById('notice-name').value||'').trim()||'名前未入力';
