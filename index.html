@@ -148,8 +148,8 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 
 <div id="sec-prog" class="sec active">
   <div class="refresh-bar">
-    <span><span class="sync-dot" id="sdot"></span><span id="sstatus">接続中...</span></span>
-    <span id="prog-time"></span>
+    <span></span>
+    <span id="time-prog" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
   </div>
   <div id="prog-part-tabs" class="tab-seg">
     <button class="seg-btn active" onclick="showProgPart('am')" id="ps-am">午前の部</button>
@@ -161,6 +161,13 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 </div>
 
 <div id="sec-dept" class="sec">
+  <div class="refresh-bar">
+    <span></span>
+    <span id="time-dept" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
+  </div>
+  <div style="background:#E6F1FB;border:0.5px solid #B5D4F4;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#0C447C;line-height:1.7;">
+    <i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px;margin-right:4px;"></i>各学科の授業担当にて体験授業の進行に合わせて状態入力をしてください。<br>状態は①授業終了②参加者人数入力＞③アンケート終了＞④個別対応＞⑤完了の順に進行します。
+  </div>
   <div class="tab-seg">
     <button class="seg-btn active" onclick="showDeptPart('am')" id="ds-am">午前</button>
     <button class="seg-btn" onclick="showDeptPart('pm')" id="ds-pm">午後</button>
@@ -170,6 +177,10 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 </div>
 
 <div id="sec-count" class="sec">
+  <div class="refresh-bar">
+    <span></span>
+    <span id="time-count" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
+  </div>
   <div class="tab-seg">
     <button class="seg-btn active" onclick="showCountPart('am')" id="cs-am">午前の部</button>
     <button class="seg-btn" onclick="showCountPart('pm')" id="cs-pm">午後の部</button>
@@ -283,6 +294,10 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 </div>
 
 <div id="sec-board" class="sec">
+  <div class="refresh-bar">
+    <span></span>
+    <span id="time-board" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
+  </div>
   <div class="compose">
     <input class="name-input" id="notice-name" placeholder="発信者名を入力..."/>
     <textarea id="notice-text" placeholder="スタッフへの連絡事項..." rows="3"></textarea>
@@ -300,6 +315,10 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 </div>
 
 <div id="sec-admin" class="sec">
+  <div class="refresh-bar" style="margin-bottom:10px;">
+    <span><span class="sync-dot" id="sdot"></span><span id="sstatus">接続中...</span></span>
+    <span id="time-admin" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
+  </div>
   <div class="warn-banner"><i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0;margin-top:1px;"></i><span>この画面は管理用です。過去履歴を表示操作できます。開催日管理・学科設定は運営管理担当者のみ操作してください。</span></div>
   <div class="tab-seg">
     <button class="seg-btn active" onclick="showAdminPart('sched')" id="as-sched">開催日</button>
@@ -599,8 +618,12 @@ onValue(STATE_REF, snap => {
 });
 
 function updateClock(){
-  const el=document.getElementById('prog-time');
-  if(el){const n=new Date();el.textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
+  const n=new Date();
+  const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+  ['time-prog','time-dept','time-count','time-board','time-admin'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=t;
+  });
 }
 setInterval(updateClock,10000);updateClock();
 
