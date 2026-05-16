@@ -47,7 +47,7 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 .warn-banner{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:14px;font-size:13px;color:#633806;display:flex;gap:8px;align-items:flex-start;line-height:1.6;}
 .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:100px;font-weight:500;}
 .badge-active{background:#E6F1FB;color:#0C447C;}
-.badge-done{background:#EAF3DE;color:#27500A;}
+.badge-done{background:#27500A;color:#ffffff;font-size:13px;padding:3px 10px;}
 .badge-skip{background:var(--color-background-secondary);color:var(--color-text-secondary);}
 .badge-urgent{background:#FCEBEB;color:#791F1F;}
 .badge-info{background:#E6F1FB;color:#0C447C;}
@@ -337,7 +337,8 @@ let state = {
   history: []
 };
 let deptPart='am';
-let progPartManual=null; // null=時刻自動, 'am'/'pm'=手動選択
+let progPartManual=null;  // null=時刻自動, 'am'/'pm'=手動選択
+let deptPartManual=null;  // null=時刻自動, 'am'/'pm'=手動選択
 let noticeTag='info';
 let editAmTl=[],editPmTl=[];
 let saving=false;
@@ -646,15 +647,17 @@ function getDefaultPart(){
 }
 function renderAll(){
   renderProgTab();
-  // 学科・来場者タブのデフォルト表示を時刻で決定
-  const defaultPart=getDefaultPart();
-  deptPart=defaultPart;
-  document.getElementById('ds-am').classList.toggle('active',defaultPart==='am');
-  document.getElementById('ds-pm').classList.toggle('active',defaultPart==='pm');
-  document.getElementById('count-am-sec').style.display=defaultPart==='am'?'block':'none';
-  document.getElementById('count-pm-sec').style.display=defaultPart==='pm'?'block':'none';
-  document.getElementById('cs-am').classList.toggle('active',defaultPart==='am');
-  document.getElementById('cs-pm').classList.toggle('active',defaultPart==='pm');
+  // 学科・来場者タブ：手動選択がなければ時刻でデフォルトを決定
+  if(deptPartManual===null){
+    const defaultPart=getDefaultPart();
+    deptPart=defaultPart;
+    document.getElementById('ds-am').classList.toggle('active',defaultPart==='am');
+    document.getElementById('ds-pm').classList.toggle('active',defaultPart==='pm');
+    document.getElementById('count-am-sec').style.display=defaultPart==='am'?'block':'none';
+    document.getElementById('count-pm-sec').style.display=defaultPart==='pm'?'block':'none';
+    document.getElementById('cs-am').classList.toggle('active',defaultPart==='am');
+    document.getElementById('cs-pm').classList.toggle('active',defaultPart==='pm');
+  }
   renderDepts();renderCount();renderNotices();renderAdmin();
 }
 
@@ -772,9 +775,9 @@ window.showHistDetail=i=>{
       <button class="btn-outline" onclick="document.getElementById('hist-detail').style.display='none'" style="margin-top:10px;">閉じる</button>
     </div>`;
 };
-window.showTab=name=>{document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('t-'+name).classList.add('active');if(name!=='prog')progPartManual=null;};
-window.showDeptPart=p=>{deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();};
-window.showCountPart=p=>{document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');};
+window.showTab=name=>{document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('t-'+name).classList.add('active');if(name!=='prog')progPartManual=null;if(name!=='dept'&&name!=='count')deptPartManual=null;};
+window.showDeptPart=p=>{deptPartManual=p;deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();};
+window.showCountPart=p=>{deptPartManual=p;document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');};
 window.showAdminPart=p=>{['sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';};
 </script>
 </body>
