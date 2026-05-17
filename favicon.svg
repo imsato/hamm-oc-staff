@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 背景：角丸正方形 イエロー -->
+  <rect width="64" height="64" rx="12" fill="#F5C200"/>
+
+  <!-- カレンダー本体 -->
+  <rect x="10" y="8" width="44" height="34" rx="4" fill="#ffffff"/>
+  <!-- カレンダー上部バー：高さを11→8に縮小 -->
+  <rect x="10" y="8" width="44" height="8" rx="4" fill="#1A3A6B"/>
+  <rect x="10" y="12" width="44" height="4" fill="#1A3A6B"/>
+  <!-- リング左 -->
+  <rect x="20" y="4" width="5" height="8" rx="2.5" fill="#1A3A6B"/>
+  <!-- リング右 -->
+  <rect x="39" y="4" width="5" height="8" rx="2.5" fill="#1A3A6B"/>
+  <!-- グリッド点1行目（y=21） -->
+  <rect x="14" y="21" width="7" height="5" rx="1" fill="#F5C200"/>
+  <rect x="24" y="21" width="7" height="5" rx="1" fill="#F5C200"/>
+  <rect x="34" y="21" width="7" height="5" rx="1" fill="#e0e0e0"/>
+  <rect x="43" y="21" width="7" height="5" rx="1" fill="#F5C200"/>
+  <!-- グリッド点2行目（y=29） -->
+  <rect x="14" y="29" width="7" height="5" rx="1" fill="#e0e0e0"/>
+  <rect x="24" y="29" width="7" height="5" rx="1" fill="#F5C200"/>
+  <rect x="34" y="29" width="7" height="5" rx="1" fill="#1A3A6B"/>
+  <rect x="43" y="29" width="7" height="5" rx="1" fill="#F5C200"/>
+  <!-- グリッド点3行目（y=37） -->
+  <rect x="14" y="37" width="7" height="3" rx="1" fill="#F5C200"/>
+  <rect x="24" y="37" width="7" height="3" rx="1" fill="#e0e0e0"/>
+  <rect x="34" y="37" width="7" height="3" rx="1" fill="#F5C200"/>
+  <rect x="43" y="37" width="7" height="3" rx="1" fill="#e0e0e0"/>
+
+  <!-- "OC" 文字：縦に拡大、横幅固定 -->
+  <g transform="translate(32,46) scale(1,1.45) translate(-32,-46)">
+    <text x="32" y="46"
+      font-family="'Arial Black','Arial',sans-serif"
+      font-size="36" font-weight="900"
+      fill="none"
+      stroke="#1A3A6B" stroke-width="3.5" stroke-linejoin="round"
+      text-anchor="middle" dominant-baseline="middle"
+      textLength="58" lengthAdjust="spacing">OC</text>
+    <text x="32" y="46"
+      font-family="'Arial Black','Arial',sans-serif"
+      font-size="36" font-weight="900"
+      fill="#F5C200"
+      text-anchor="middle" dominant-baseline="middle"
+      textLength="58" lengthAdjust="spacing">OC</text>
+  </g>
+</svg>
