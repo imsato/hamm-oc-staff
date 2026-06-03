@@ -89,46 +89,65 @@ export function renderDepts(){
                  step===0?'<span class="badge badge-active">授業中</span>':
                  step===4?'<span class="badge badge-done">完了</span>':
                  `<span class="badge" style="background:${STEP_BG[step]};color:${STEP_COL[step]};">${STEPS[step]}</span>`;
-    const inputHtml=(!skip&&step===1)?`<div class="input-row">
-      <div class="input-group"><label>高校生</label><input type="number" min="0" value="${dp.hs}" onchange="setNum('${d.code}','${vars.deptPart}','hs',this.value)"></div>
-      <div class="input-group"><label>保護者</label><input type="number" min="0" value="${dp.par}" onchange="setNum('${d.code}','${vars.deptPart}','par',this.value)"></div>
-      <div class="input-group"><label>個別相談希望</label><input type="number" min="0" value="${dp.consult}" onchange="setNum('${d.code}','${vars.deptPart}','consult',this.value)"></div>
-      <div class="input-group"><label>ツアー希望</label><input type="number" min="0" value="${dp.tour}" onchange="setNum('${d.code}','${vars.deptPart}','tour',this.value)"></div>
-    </div>`:'';
+    const inputHtml=(!skip&&step===1)?`
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;">
+        <div class="input-group"><label>高校生</label><input type="number" min="0" value="${dp.hs}" onchange="setNum('${d.code}','${vars.deptPart}','hs',this.value)"></div>
+        <div class="input-group"><label>保護者</label><input type="number" min="0" value="${dp.par}" onchange="setNum('${d.code}','${vars.deptPart}','par',this.value)"></div>
+        <div class="input-group"><label>留学生</label><input type="number" min="0" value="${dp.intl||0}" onchange="setNum('${d.code}','${vars.deptPart}','intl',this.value)"></div>
+      </div>
+      <div class="input-row" style="margin-top:6px;">
+        <div class="input-group"><label>個別相談希望</label><input type="number" min="0" value="${dp.consult}" onchange="setNum('${d.code}','${vars.deptPart}','consult',this.value)"></div>
+        <div class="input-group"><label>ツアー希望</label><input type="number" min="0" value="${dp.tour}" onchange="setNum('${d.code}','${vars.deptPart}','tour',this.value)"></div>
+      </div>`:'';
     let stepBtns='';
     if(!skip){
       const nextBtn=step<4?`<button class="step-btn current" onclick="advanceDept('${d.code}','${vars.deptPart}')">${STEPS[step+1]}へ進む <i class="ti ti-arrow-right" style="font-size:12px"></i></button>`:'';
       const backBtn=step>=1?`<button class="btn-back" onclick="backDept('${d.code}','${vars.deptPart}')"><i class="ti ti-arrow-left" style="font-size:12px;vertical-align:-1px"></i> 前に戻る</button>`:'';
       if(nextBtn||backBtn) stepBtns=`<div class="step-btns">${nextBtn}${backBtn}</div>`;
     }
-    const info=(!skip&&step>=1)?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">高校生 ${dp.hs}名 保護者 ${dp.par}名 ／ 相談 ${dp.consult}名 ツアー ${dp.tour}名${dp.doneTime?' ／ 完了 '+dp.doneTime:''}</div>`:'';
+    const consultBadge=dp.consult>0?`<span class="badge badge-urgent" style="margin-left:2px;font-size:11px;">${dp.consult}名</span>`:`${dp.consult}名`;
+    const tourBadge=dp.tour>0?`<span class="badge badge-info" style="margin-left:2px;font-size:11px;">${dp.tour}名</span>`:`${dp.tour}名`;
+    const info=(!skip&&step>=1)?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">高校生 ${dp.hs}名 保護者 ${dp.par}名 留学生 ${dp.intl||0}名 ／ 相談 ${consultBadge} ツアー ${tourBadge}${dp.doneTime?' ／ 完了 '+dp.doneTime:''}</div>`:'';
     return`<div class="dept-card"><div class="dept-header"><div class="dept-name">${d.code}：${d.name}</div>${badge}</div>${info}${inputHtml}${stepBtns}</div>`;
   }).join('');
 }
 
 export function renderCount(){
-  const amHs=state.count.am.hs||0, amPar=state.count.am.par||0;
-  const pmHs=state.count.pm.hs||0, pmPar=state.count.pm.par||0;
-  const tHs=amHs+pmHs, tPar=amPar+pmPar;
+  const amHs=state.count.am.hs||0, amPar=state.count.am.par||0, amIntl=state.count.am.intl||0;
+  const pmHs=state.count.pm.hs||0, pmPar=state.count.pm.par||0, pmIntl=state.count.pm.intl||0;
+  const tHs=amHs+pmHs, tPar=amPar+pmPar, tIntl=amIntl+pmIntl;
 
   ['am','pm'].forEach(p=>{
-    const hs=state.count[p].hs||0, par=state.count[p].par||0;
+    const hs=state.count[p].hs||0, par=state.count[p].par||0, intl=state.count[p].intl||0;
+    const fixed=state.count[p].fixed||false;
     const hsEl=document.getElementById(`${p}-hs`);
     const parEl=document.getElementById(`${p}-par`);
+    const intlEl=document.getElementById(`${p}-intl`);
+    const fixedEl=document.getElementById(`fixed-${p}`);
     if(hsEl && document.activeElement!==hsEl) hsEl.value=hs;
     if(parEl && document.activeElement!==parEl) parEl.value=par;
+    if(intlEl && document.activeElement!==intlEl) intlEl.value=intl;
+    if(fixedEl) fixedEl.checked=fixed;
+    // 入力欄・ボタンの有効/無効を切り替え
+    const sec=document.getElementById(`count-${p}-sec`);
+    if(sec){
+      sec.querySelectorAll('.counter-input').forEach(el=>{if(document.activeElement!==el)el.disabled=fixed;});
+      sec.querySelectorAll('.cbtn').forEach(el=>{el.disabled=fixed;});
+    }
   });
 
   const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  setEl('sum-am-hs',amHs); setEl('sum-am-par',amPar); setEl('sum-am-total',amHs+amPar);
-  setEl('sum-pm-hs',pmHs); setEl('sum-pm-par',pmPar); setEl('sum-pm-total',pmHs+pmPar);
-  setEl('sum-day-hs',tHs); setEl('sum-day-par',tPar); setEl('sum-day-total',tHs+tPar);
+  setEl('sum-am-hs',amHs); setEl('sum-am-par',amPar); setEl('sum-am-intl',amIntl); setEl('sum-am-total',amHs+amPar+amIntl);
+  setEl('sum-pm-hs',pmHs); setEl('sum-pm-par',pmPar); setEl('sum-pm-intl',pmIntl); setEl('sum-pm-total',pmHs+pmPar+pmIntl);
+  setEl('sum-day-hs',tHs); setEl('sum-day-par',tPar); setEl('sum-day-intl',tIntl); setEl('sum-day-total',tHs+tPar+tIntl);
 
-  const rv=state.session.reservation||{amPart:0,amGuardian:0,pmPart:0,pmGuardian:0};
+  const rv=state.session.reservation||{amPart:0,amGuardian:0,amIntl:0,pmPart:0,pmGuardian:0,pmIntl:0};
   setEl('rv-am-part-disp',rv.amPart||0);
   setEl('rv-am-guardian-disp',rv.amGuardian||0);
+  setEl('rv-am-intl-disp',rv.amIntl||0);
   setEl('rv-pm-part-disp',rv.pmPart||0);
   setEl('rv-pm-guardian-disp',rv.pmGuardian||0);
+  setEl('rv-pm-intl-disp',rv.pmIntl||0);
 }
 
 export function renderNotices(){
@@ -185,12 +204,16 @@ export function renderAdmin(){
   const rv=state.session.reservation||{amPart:0,amGuardian:0,pmPart:0,pmGuardian:0};
   const rvAp=document.getElementById('rv-am-part');
   const rvAg=document.getElementById('rv-am-guardian');
+  const rvAi=document.getElementById('rv-am-intl');
   const rvPp=document.getElementById('rv-pm-part');
   const rvPg=document.getElementById('rv-pm-guardian');
+  const rvPi=document.getElementById('rv-pm-intl');
   if(rvAp)rvAp.value=rv.amPart||0;
   if(rvAg)rvAg.value=rv.amGuardian||0;
+  if(rvAi)rvAi.value=rv.amIntl||0;
   if(rvPp)rvPp.value=rv.pmPart||0;
   if(rvPg)rvPg.value=rv.pmGuardian||0;
+  if(rvPi)rvPi.value=rv.pmIntl||0;
   renderAdminDongseiPreview();
   document.getElementById('dept-session-date').textContent=selLabel;
   document.getElementById('tl-session-date').textContent=selLabel;

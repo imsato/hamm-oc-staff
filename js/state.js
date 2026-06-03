@@ -28,7 +28,7 @@ export const vars = {
 };
 
 export function clone(x){return JSON.parse(JSON.stringify(x));}
-export function newDP(){return{step:0,hs:0,par:0,consult:0,tour:0,doneTime:''};}
+export function newDP(){return{step:0,hs:0,par:0,intl:0,consult:0,tour:0,doneTime:''};}
 export function getNow(){const n=new Date();return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
 export function formatDate(d){if(!d)return'';const dt=new Date(d+'T00:00:00');return`${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`;}
 export function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -62,10 +62,14 @@ export function ensureDefaults() {
   });
 
   if (!state.count || typeof state.count !== 'object') {
-    state.count = {am:{hs:0,par:0}, pm:{hs:0,par:0}};
+    state.count = {am:{hs:0,par:0,intl:0,fixed:false}, pm:{hs:0,par:0,intl:0,fixed:false}};
   }
-  if (!state.count.am) state.count.am = {hs:0,par:0};
-  if (!state.count.pm) state.count.pm = {hs:0,par:0};
+  if (!state.count.am) state.count.am = {hs:0,par:0,intl:0,fixed:false};
+  if (!state.count.pm) state.count.pm = {hs:0,par:0,intl:0,fixed:false};
+  if (state.count.am.intl === undefined) state.count.am.intl = 0;
+  if (state.count.am.fixed === undefined) state.count.am.fixed = false;
+  if (state.count.pm.intl === undefined) state.count.pm.intl = 0;
+  if (state.count.pm.fixed === undefined) state.count.pm.fixed = false;
 
   if (!state.session || typeof state.session !== 'object') {
     state.session = {active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:''};
@@ -79,8 +83,10 @@ export function ensureDefaults() {
   const rv = state.session.reservation;
   if (rv.amPart === undefined) rv.amPart = 0;
   if (rv.amGuardian === undefined) rv.amGuardian = 0;
+  if (rv.amIntl === undefined) rv.amIntl = 0;
   if (rv.pmPart === undefined) rv.pmPart = 0;
   if (rv.pmGuardian === undefined) rv.pmGuardian = 0;
+  if (rv.pmIntl === undefined) rv.pmIntl = 0;
 
   if (!Array.isArray(state.notices)) state.notices = [];
   if (!Array.isArray(state.schedules)) state.schedules = [];

@@ -11,8 +11,10 @@ window.saveReservation=()=>{
   const rv=state.session.reservation;
   rv.amPart=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-am-part').value)||0));
   rv.amGuardian=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-am-guardian').value)||0));
+  rv.amIntl=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-am-intl').value)||0));
   rv.pmPart=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-part').value)||0));
   rv.pmGuardian=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-guardian').value)||0));
+  rv.pmIntl=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-intl').value)||0));
   saveSession();
 };
 
@@ -49,14 +51,27 @@ window.backDept=(code,part)=>{
 window.setNum=(code,part,key,val)=>{state.depts[code][part][key]=Math.max(0,parseInt(val)||0);saveDept(code);};
 
 window.chg=(part,type,delta)=>{
+  if(state.count[part].fixed) return;
   state.count[part][type]=Math.max(0,(state.count[part][type]||0)+delta);
   saveCount();
 };
 
 window.chgDirect=(part,type,val)=>{
+  if(state.count[part].fixed) return;
   const n=parseInt(val);
   if(isNaN(n)||n<0) return;
   state.count[part][type]=n;
+  saveCount();
+};
+
+window.toggleFixed=(part,checkbox)=>{
+  const newVal=checkbox.checked;
+  const label=part==='am'?'午前':'午後';
+  const msg=newVal
+    ?`${label}の来場者人数を確定しますか？`
+    :`${label}の来場者人数確定を解除しますか？`;
+  if(!confirm(msg)){checkbox.checked=!newVal;return;}
+  state.count[part].fixed=newVal;
   saveCount();
 };
 

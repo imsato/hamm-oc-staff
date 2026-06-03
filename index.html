@@ -60,8 +60,15 @@
 
   <!-- 午前の部 -->
   <div id="count-am-sec">
+    <!-- 来場者人数確定チェックボックス -->
+    <div class="fixed-check-row">
+      <label>
+        <input type="checkbox" id="fixed-am" onchange="toggleFixed('am',this)">
+        来場者人数確定
+      </label>
+    </div>
     <!-- 高校生カウンター（左：予約人数表示 / 右：カウンター） -->
-    <div style="display:flex;align-items:center;gap:10px;padding:16px 0 8px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 0 8px;">
       <div class="reservation-display">
         <div class="rv-label">予約</div>
         <div class="rv-val" id="rv-am-part-disp">0</div>
@@ -78,7 +85,7 @@
       </div>
     </div>
     <!-- 保護者カウンター -->
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 8px;">
       <div class="reservation-display">
         <div class="rv-label">予約</div>
         <div class="rv-val" id="rv-am-guardian-disp">0</div>
@@ -94,11 +101,35 @@
         </div>
       </div>
     </div>
+    <!-- 留学生カウンター -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px;">
+      <div class="reservation-display">
+        <div class="rv-label">予約</div>
+        <div class="rv-val" id="rv-am-intl-disp">0</div>
+        <div class="rv-label">名</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div class="label" style="margin-bottom:6px;">留学生</div>
+        <input class="counter-input" type="number" min="0" id="am-intl" value="0"
+          oninput="chgDirect('am','intl',this.value)">
+        <div class="counter-btns">
+          <button class="cbtn" onclick="chg('am','intl',-1)">－</button>
+          <button class="cbtn plus" onclick="chg('am','intl',1)">＋</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 午後の部 -->
   <div id="count-pm-sec" style="display:none;">
-    <div style="display:flex;align-items:center;gap:10px;padding:16px 0 8px;">
+    <!-- 来場者人数確定チェックボックス -->
+    <div class="fixed-check-row">
+      <label>
+        <input type="checkbox" id="fixed-pm" onchange="toggleFixed('pm',this)">
+        来場者人数確定
+      </label>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 0 8px;">
       <div class="reservation-display">
         <div class="rv-label">予約</div>
         <div class="rv-val" id="rv-pm-part-disp">0</div>
@@ -114,7 +145,7 @@
         </div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 8px;">
       <div class="reservation-display">
         <div class="rv-label">予約</div>
         <div class="rv-val" id="rv-pm-guardian-disp">0</div>
@@ -130,6 +161,23 @@
         </div>
       </div>
     </div>
+    <!-- 留学生カウンター -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 16px;">
+      <div class="reservation-display">
+        <div class="rv-label">予約</div>
+        <div class="rv-val" id="rv-pm-intl-disp">0</div>
+        <div class="rv-label">名</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div class="label" style="margin-bottom:6px;">留学生</div>
+        <input class="counter-input" type="number" min="0" id="pm-intl" value="0"
+          oninput="chgDirect('pm','intl',this.value)">
+        <div class="counter-btns">
+          <button class="cbtn" onclick="chg('pm','intl',-1)">－</button>
+          <button class="cbtn plus" onclick="chg('pm','intl',1)">＋</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 集計表（常時表示） -->
@@ -139,6 +187,7 @@
         <th></th>
         <th>高校生</th>
         <th>保護者</th>
+        <th>留学生</th>
         <th>動員合計</th>
       </tr>
     </thead>
@@ -147,18 +196,21 @@
         <td>午前の部</td>
         <td id="sum-am-hs">0</td>
         <td id="sum-am-par">0</td>
+        <td id="sum-am-intl">0</td>
         <td class="total-col" id="sum-am-total">0</td>
       </tr>
       <tr>
         <td>午後の部</td>
         <td id="sum-pm-hs">0</td>
         <td id="sum-pm-par">0</td>
+        <td id="sum-pm-intl">0</td>
         <td class="total-col" id="sum-pm-total">0</td>
       </tr>
       <tr>
         <td>本日合計</td>
         <td id="sum-day-hs">0</td>
         <td id="sum-day-par">0</td>
+        <td id="sum-day-intl">0</td>
         <td class="total-col" id="sum-day-total">0</td>
       </tr>
     </tbody>
@@ -228,6 +280,12 @@
                 style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
                 onchange="saveReservation()">
             </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午前留学生</label>
+              <input type="number" min="0" max="999" id="rv-am-intl"
+                style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
+                onchange="saveReservation()">
+            </div>
           </div>
         </div>
         <div>
@@ -242,6 +300,12 @@
             <div style="display:flex;align-items:center;gap:6px;">
               <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午後保護者等</label>
               <input type="number" min="0" max="999" id="rv-pm-guardian"
+                style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
+                onchange="saveReservation()">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11px;color:var(--color-text-secondary);white-space:nowrap;min-width:72px;">午後留学生</label>
+              <input type="number" min="0" max="999" id="rv-pm-intl"
                 style="width:64px;padding:6px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;text-align:center;"
                 onchange="saveReservation()">
             </div>
