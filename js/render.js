@@ -74,6 +74,15 @@ export function renderProgTab(){
     document.getElementById('ps-am').classList.toggle('active',!showPmTab);
     document.getElementById('ps-pm').classList.toggle('active',showPmTab);
   }
+  // メッセージボックスの色を午前・午後に合わせて切り替え
+  const msgEl=document.getElementById('prog-info-msg');
+  if(msgEl){
+    let isPm;
+    if(pm==='pm') isPm=true;
+    else if(pm==='am') isPm=false;
+    else isPm=vars.progPartManual!==null ? vars.progPartManual==='pm' : new Date().getHours()>=12;
+    msgEl.className='prog-msg '+(isPm?'prog-msg-pm':'prog-msg-am');
+  }
   renderProgDongsei();
 }
 
