@@ -89,6 +89,8 @@ export function renderProgTab(){
 function isSkip(code,part){return part==='am'?state.depts[code].skipAm:state.depts[code].skipPm;}
 
 export function renderDepts(){
+  const msgEl=document.getElementById('dept-info-msg');
+  if(msgEl) msgEl.className='prog-msg '+(vars.deptPart==='pm'?'prog-msg-pm':'prog-msg-am');
   const active=DEPTS.filter(d=>!isSkip(d.code,vars.deptPart));
   const done=active.filter(d=>state.depts[d.code][vars.deptPart].step===4).length;
   document.getElementById('dept-summary').textContent=`対象 ${active.length}学科 ／ 完了 ${done}科 ／ 進行中 ${active.length-done}科`;
