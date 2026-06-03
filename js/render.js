@@ -67,7 +67,7 @@ export function renderProgTab(){
     if(vars.progPartManual!==null){
       showPmTab = vars.progPartManual==='pm';
     } else {
-      showPmTab = new Date().getHours() >= 12;
+      const _n=new Date();showPmTab=_n.getHours()*60+_n.getMinutes()>=12*60+30;
     }
     document.getElementById('prog-am').style.display=showPmTab?'none':'block';
     document.getElementById('prog-pm').style.display=showPmTab?'block':'none';
@@ -257,7 +257,7 @@ export function getDefaultPart(){
   if(pm==='pm') return 'pm';
   const n=new Date();
   const minutes=n.getHours()*60+n.getMinutes();
-  return minutes >= 12*60+31 ? 'pm' : 'am';
+  return minutes >= 12*60+30 ? 'pm' : 'am';
 }
 
 export function renderAll(){
