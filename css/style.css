@@ -83,6 +83,9 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 .tab-seg{display:flex;margin-bottom:14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;}
 .seg-btn{flex:1;padding:9px 4px;border:none;background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);}
 .seg-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);font-weight:500;}
+/* 午前・午後タブの色分け（管理タブのサブタブには適用しない） */
+#ps-am.active,#ds-am.active,#cs-am.active{background:#185FA5;color:#ffffff;border-color:transparent;}
+#ps-pm.active,#ds-pm.active,#cs-pm.active{background:#C05C00;color:#ffffff;border-color:transparent;}
 .hist-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;cursor:pointer;}
 .sched-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
 .refresh-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;color:var(--color-text-secondary);}
