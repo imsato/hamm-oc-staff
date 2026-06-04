@@ -170,7 +170,10 @@ window.showHistDetail=i=>{
       <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 参加者</div><div class="val">${(h.count.am.hs||0)+(h.count.am.intl||0)}</div></div><div class="stat"><div class="label">午前 付き添い</div><div class="val">${h.count.am.par||0}</div></div><div class="stat"><div class="label">午後 参加者</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.intl||0)}</div></div><div class="stat"><div class="label">午後 付き添い</div><div class="val">${h.count.pm.par||0}</div></div></div>
       <div class="sec-hd">学科別記録</div>${deptRows}
       ${(h.notices||[]).length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
-      <button class="btn-outline" onclick="closeHistDetail()" style="margin-top:10px;">閉じる</button>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-outline" onclick="closeHistDetail()" style="flex:1;">閉じる</button>
+        <button class="btn-outline" onclick="deleteHist(${i})" style="flex:1;color:#A32D2D;border-color:#EF9F27;">この履歴を削除</button>
+      </div>
     </div>`;
 };
 

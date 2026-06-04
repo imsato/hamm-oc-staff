@@ -285,7 +285,6 @@ export function renderHistList(){
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;">
           <button class="step-btn${isSel?' current':''}" onclick="showHistDetail(${h._i})">詳細${isSel?' ▼':''}</button>
-          <button class="step-btn" onclick="deleteHist(${h._i})" style="color:#A32D2D;border-color:#EF9F27;">削除</button>
         </div>
       </div>`;
     }).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>'}
