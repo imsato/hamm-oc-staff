@@ -190,3 +190,12 @@ window.setHistLimit=n=>{
   document.getElementById('hist-detail').style.display='none';
   renderAdmin();
 };
+
+window.moveSchedPage=delta=>{
+  const PAGE=3;
+  const schedules=state.schedules||[];
+  const maxOffset=Math.max(0,schedules.length-PAGE);
+  const current=vars.schedOffset<0?maxOffset:vars.schedOffset;
+  vars.schedOffset=Math.max(0,Math.min(current+delta,maxOffset));
+  renderAdmin();
+};

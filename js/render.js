@@ -202,11 +202,25 @@ export function renderTlRows(part){
 
 export function renderAdmin(){
   const schedules=state.schedules||[];
-  document.getElementById('sched-list').innerHTML=schedules.length?schedules.map(s=>`
-    <div class="sched-item">
-      <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(s.date)}</div>${s.memo?`<div style="font-size:12px;color:var(--color-text-secondary);">${s.memo}</div>`:''}</div>
-      <div style="display:flex;gap:6px;"><button class="step-btn" onclick="selectSession('${s.id}')">選択</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;border-color:#EF9F27;">削除</button></div>
-    </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">開催日が登録されていません</div>';
+  const PAGE=3;
+  const maxOffset=Math.max(0,schedules.length-PAGE);
+  const offset=vars.schedOffset<0?maxOffset:Math.min(vars.schedOffset,maxOffset);
+  const pageItems=schedules.slice(offset,offset+PAGE);
+  const hasPrev=offset>0;
+  const hasNext=offset+PAGE<schedules.length;
+  const btnStyle=(enabled)=>`padding:6px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:${enabled?'pointer':'default'};background:transparent;color:${enabled?'var(--color-text-primary)':'var(--color-text-secondary)'};opacity:${enabled?'1':'0.35'};`;
+  document.getElementById('sched-list').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <button onclick="moveSchedPage(-${PAGE})" ${!hasPrev?'disabled':''} style="${btnStyle(hasPrev)}">← 前の3件</button>
+      <span style="font-size:12px;color:var(--color-text-secondary);">${schedules.length>0?`${offset+1}〜${Math.min(offset+PAGE,schedules.length)}件目 / 全${schedules.length}件`:'0件'}</span>
+      <button onclick="moveSchedPage(${PAGE})" ${!hasNext?'disabled':''} style="${btnStyle(hasNext)}">次の3件 →</button>
+    </div>
+    ${pageItems.length?pageItems.map(s=>`
+      <div class="sched-item">
+        <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(s.date)}</div>${s.memo?`<div style="font-size:12px;color:var(--color-text-secondary);">${s.memo}</div>`:''}</div>
+        <div style="display:flex;gap:6px;"><button class="step-btn" onclick="selectSession('${s.id}')">選択</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;border-color:#EF9F27;">削除</button></div>
+      </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">開催日が登録されていません</div>'}
+  `;
   const selSched=state.session.id?schedules.find(x=>x.id===state.session.id):null;
   const selLabel=selSched?formatDate(selSched.date)+(selSched.memo?' — '+selSched.memo:''):'未選択';
   document.getElementById('current-session-label').textContent=selLabel;
