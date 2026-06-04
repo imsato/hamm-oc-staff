@@ -1,6 +1,6 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
 import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules } from './state.js';
-import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows } from './render.js';
+import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin } from './render.js';
 
 window.showProgPart=p=>{
   vars.progPartManual=p;
@@ -184,3 +184,9 @@ window.showTab=name=>{
 window.showDeptPart=p=>{vars.deptPartManual=p;vars.deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();};
 window.showCountPart=p=>{vars.deptPartManual=p;document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');};
 window.showAdminPart=p=>{['sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';};
+
+window.setHistLimit=n=>{
+  vars.histLimit=n;
+  document.getElementById('hist-detail').style.display='none';
+  renderAdmin();
+};

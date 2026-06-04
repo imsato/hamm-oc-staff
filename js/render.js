@@ -246,11 +246,23 @@ export function renderAdmin(){
       </div>
     </div>`).join('');
   const history=state.history||[];
-  document.getElementById('hist-list').innerHTML=history.length?history.map((h,i)=>`
-    <div class="hist-item" onclick="showHistDetail(${i})">
-      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(h.date)}</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${(h.count.am.hs||0)+(h.count.pm.hs||0)}名 保護者 ${(h.count.am.par||0)+(h.count.pm.par||0)}名 留学生 ${(h.count.am.intl||0)+(h.count.pm.intl||0)}名 合計 ${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)+(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}名</div>
-    </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>';
+  const shown=vars.histLimit>0?history.slice(0,vars.histLimit):history;
+  const limBtns=[3,5,10,0].map(n=>{
+    const active=vars.histLimit===n;
+    const label=n===0?'すべて':`最新${n}件`;
+    return `<button onclick="setHistLimit(${n})" style="padding:5px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:${active?'var(--color-text-primary)':'transparent'};color:${active?'var(--color-background-primary)':'var(--color-text-secondary)'};">${label}</button>`;
+  }).join('');
+  document.getElementById('hist-list').innerHTML=`
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+      ${limBtns}
+      <span style="font-size:12px;color:var(--color-text-secondary);">${history.length}件中 ${shown.length}件表示</span>
+    </div>
+    ${shown.length?shown.map((h,i)=>`
+      <div class="hist-item" onclick="showHistDetail(${i})">
+        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(h.date)}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${(h.count.am.hs||0)+(h.count.pm.hs||0)}名 保護者 ${(h.count.am.par||0)+(h.count.pm.par||0)}名 留学生 ${(h.count.am.intl||0)+(h.count.pm.intl||0)}名 合計 ${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)+(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}名</div>
+      </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>'}
+  `;
 }
 
 export function getDefaultPart(){

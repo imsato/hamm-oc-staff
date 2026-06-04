@@ -24,7 +24,8 @@ export const vars = {
   noticeTag: 'info',
   editAmTl: [],
   editPmTl: [],
-  saving: false
+  saving: false,
+  histLimit: 5   // 履歴表示件数（0=すべて）
 };
 
 export function clone(x){return JSON.parse(JSON.stringify(x));}
