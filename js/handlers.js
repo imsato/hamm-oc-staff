@@ -165,7 +165,7 @@ window.showHistDetail=i=>{
   document.getElementById('hist-detail').innerHTML=`
     <div class="card">
       <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary);">${formatDate(h.date)} 詳細</div>
-      <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 合計</div><div class="val">${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)}</div></div><div class="stat"><div class="label">午後 合計</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}</div></div></div>
+      <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 参加者</div><div class="val">${(h.count.am.hs||0)+(h.count.am.intl||0)}</div></div><div class="stat"><div class="label">午前 付き添い</div><div class="val">${h.count.am.par||0}</div></div><div class="stat"><div class="label">午後 参加者</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.intl||0)}</div></div><div class="stat"><div class="label">午後 付き添い</div><div class="val">${h.count.pm.par||0}</div></div></div>
       <div class="sec-hd">学科別記録</div>${deptRows}
       ${(h.notices||[]).length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
       <button class="btn-outline" onclick="document.getElementById('hist-detail').style.display='none'" style="margin-top:10px;">閉じる</button>
