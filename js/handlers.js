@@ -1,5 +1,5 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
-import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules } from './state.js';
+import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory } from './state.js';
 import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin } from './render.js';
 
 window.showProgPart=p=>{
@@ -189,6 +189,13 @@ window.setHistLimit=n=>{
   vars.histLimit=n;
   document.getElementById('hist-detail').style.display='none';
   renderAdmin();
+};
+
+window.deleteHist=i=>{
+  if(!confirm('履歴が削除されます。よろしいですか？'))return;
+  if(state.history[i]) state.history[i].deleted=true;
+  saveHistory();
+  document.getElementById('hist-detail').style.display='none';
 };
 
 window.moveSchedPage=delta=>{

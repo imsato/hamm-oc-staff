@@ -142,3 +142,7 @@ export function saveSession(){
 export function saveSchedules(){
   savePath('schedules', state.schedules);
 }
+
+export function saveHistory(){
+  savePath('history', state.history);
+}
