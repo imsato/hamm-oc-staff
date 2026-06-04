@@ -1,6 +1,22 @@
 import { DEPTS, STEPS, STEP_BG, STEP_COL, DEFAULT_AM, DEFAULT_PM } from './config.js';
 import { state, vars, clone, formatDate, esc } from './state.js';
 
+function updateSessionDate(){
+  const date=state.session.date;
+  let text;
+  if(date){
+    const dt=new Date(date+'T00:00:00');
+    const days=['日','月','火','水','木','金','土'];
+    text=`開催日：${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日（${days[dt.getDay()]}）`;
+  } else {
+    text='開催日：未指定';
+  }
+  ['prog','dept','count','board'].forEach(id=>{
+    const el=document.getElementById(`session-date-${id}`);
+    if(el) el.textContent=text;
+  });
+}
+
 export function updateClock(){
   const n=new Date();
   const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
@@ -301,6 +317,7 @@ export function getDefaultPart(){
 }
 
 export function renderAll(){
+  updateSessionDate();
   renderProgTab();
   if(vars.deptPartManual===null){
     const defaultPart=getDefaultPart();
