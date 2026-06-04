@@ -216,9 +216,9 @@ export function renderAdmin(){
       <button onclick="moveSchedPage(${PAGE})" ${!hasNext?'disabled':''} style="${btnStyle(hasNext)}">次の3件 →</button>
     </div>
     ${pageItems.length?pageItems.map(s=>`
-      <div class="sched-item">
+      <div class="sched-item${s.id===state.session.id?' hist-item-selected':''}">
         <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(s.date)}</div>${s.memo?`<div style="font-size:12px;color:var(--color-text-secondary);">${s.memo}</div>`:''}</div>
-        <div style="display:flex;gap:6px;"><button class="step-btn" onclick="selectSession('${s.id}')">選択</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;border-color:#EF9F27;">削除</button></div>
+        <div style="display:flex;gap:6px;"><button class="step-btn${s.id===state.session.id?' current':''}" onclick="selectSession('${s.id}')">${s.id===state.session.id?'選択中':'選択'}</button><button class="step-btn" onclick="delSched('${s.id}')" style="color:#A32D2D;border-color:#EF9F27;">削除</button></div>
       </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">開催日が登録されていません</div>'}
   `;
   const selSched=state.session.id?schedules.find(x=>x.id===state.session.id):null;
