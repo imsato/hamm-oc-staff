@@ -1,5 +1,5 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
-import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession } from './state.js';
+import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules } from './state.js';
 import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows } from './render.js';
 
 window.showProgPart=p=>{
@@ -15,6 +15,9 @@ window.saveReservation=()=>{
   rv.pmPart=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-part').value)||0));
   rv.pmGuardian=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-guardian').value)||0));
   rv.pmIntl=Math.min(999,Math.max(0,parseInt(document.getElementById('rv-pm-intl').value)||0));
+  // 開催日エントリにも書き戻す
+  const sel=state.schedules.find(x=>x.id===state.session.id);
+  if(sel){sel.reservation=clone(rv);saveSchedules();}
   saveSession();
 };
 
@@ -89,7 +92,7 @@ window.addSched=()=>{
   const d=document.getElementById('new-date').value,m=document.getElementById('new-memo').value;
   if(!d)return;
   if(state.schedules.find(s=>s.date===d)){alert('同じ日付が既に登録されています');return;}
-  state.schedules.push({date:d,memo:m,id:'s'+Date.now(),partMode:'both',amTl:clone(DEFAULT_AM),pmTl:clone(DEFAULT_PM)});
+  state.schedules.push({date:d,memo:m,id:'s'+Date.now(),partMode:'both',amTl:clone(DEFAULT_AM),pmTl:clone(DEFAULT_PM),reservation:{amPart:0,amGuardian:0,amIntl:0,pmPart:0,pmGuardian:0,pmIntl:0}});
   state.schedules.sort((a,b)=>a.date.localeCompare(b.date));
   document.getElementById('new-date').value='';document.getElementById('new-memo').value='';saveState();
 };
@@ -102,6 +105,9 @@ window.selectSession=id=>{
   state.session.partMode=s.partMode||'both';
   state.session.amTl=s.amTl?clone(s.amTl):clone(DEFAULT_AM);
   state.session.pmTl=s.pmTl?clone(s.pmTl):clone(DEFAULT_PM);
+  // 開催日ごとの予約人数を読み込む
+  const rv=s.reservation||{amPart:0,amGuardian:0,amIntl:0,pmPart:0,pmGuardian:0,pmIntl:0};
+  state.session.reservation=clone(rv);
   saveState();
 };
 
@@ -110,7 +116,7 @@ window.startSession=()=>{
   if(!confirm('開催を開始しますか？当日のデータがリセットされます。'))return;
   state.session.active=true;
   DEPT_KEYS.forEach(k=>{state.depts[k].am=newDP();state.depts[k].pm=newDP();});
-  state.count={am:{hs:0,par:0},pm:{hs:0,par:0}};state.notices=[];saveState();
+  state.count={am:{hs:0,par:0,intl:0,fixed:false},pm:{hs:0,par:0,intl:0,fixed:false}};state.notices=[];saveState();
 };
 
 window.endSession=()=>{
@@ -159,7 +165,7 @@ window.showHistDetail=i=>{
   document.getElementById('hist-detail').innerHTML=`
     <div class="card">
       <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary);">${formatDate(h.date)} 詳細</div>
-      <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 合計</div><div class="val">${(h.count.am.hs||0)+(h.count.am.par||0)}</div></div><div class="stat"><div class="label">午後 合計</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.par||0)}</div></div></div>
+      <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 合計</div><div class="val">${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)}</div></div><div class="stat"><div class="label">午後 合計</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}</div></div></div>
       <div class="sec-hd">学科別記録</div>${deptRows}
       ${(h.notices||[]).length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
       <button class="btn-outline" onclick="document.getElementById('hist-detail').style.display='none'" style="margin-top:10px;">閉じる</button>

@@ -249,7 +249,7 @@ export function renderAdmin(){
   document.getElementById('hist-list').innerHTML=history.length?history.map((h,i)=>`
     <div class="hist-item" onclick="showHistDetail(${i})">
       <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(h.date)}</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${(h.count.am.hs||0)+(h.count.pm.hs||0)}名 保護者 ${(h.count.am.par||0)+(h.count.pm.par||0)}名 合計 ${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.pm.hs||0)+(h.count.pm.par||0)}名</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${(h.count.am.hs||0)+(h.count.pm.hs||0)}名 保護者 ${(h.count.am.par||0)+(h.count.pm.par||0)}名 留学生 ${(h.count.am.intl||0)+(h.count.pm.intl||0)}名 合計 ${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)+(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}名</div>
     </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>';
 }
 

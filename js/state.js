@@ -136,3 +136,7 @@ export function saveNotices(){
 export function saveSession(){
   savePath('session', state.session);
 }
+
+export function saveSchedules(){
+  savePath('schedules', state.schedules);
+}
