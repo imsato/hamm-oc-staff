@@ -278,7 +278,7 @@ export function renderHistList(){
     </div>
     ${shown.length?shown.map(h=>{
       const isSel=h._i===vars.selectedHistIdx;
-      return `<div class="hist-item" style="${isSel?'background:#E6F1FB;border-left:3px solid #185FA5;padding-left:11px;':''}">
+      return `<div class="hist-item${isSel?' hist-item-selected':''}">
         <div>
           <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(h.date)}</div>
           <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${(h.count.am.hs||0)+(h.count.pm.hs||0)}名 保護者 ${(h.count.am.par||0)+(h.count.pm.par||0)}名 留学生 ${(h.count.am.intl||0)+(h.count.pm.intl||0)}名 合計 ${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)+(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}名</div>
