@@ -1,6 +1,6 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
 import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory } from './state.js';
-import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin } from './render.js';
+import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin, renderHistList } from './render.js';
 
 window.showProgPart=p=>{
   vars.progPartManual=p;
@@ -151,6 +151,8 @@ window.toggleSkipAm=(code,val)=>{state.depts[code].skipAm=val;saveDept(code);};
 window.toggleSkipPm=(code,val)=>{state.depts[code].skipPm=val;saveDept(code);};
 
 window.showHistDetail=i=>{
+  vars.selectedHistIdx=i;
+  renderHistList();
   const h=(state.history||[])[i];if(!h)return;
   const tLabel={urgent:'緊急',info:'通知',complete:'完了'};
   const deptRows=DEPTS.filter(d=>h.depts&&h.depts[d.code]).map(d=>{
@@ -168,7 +170,7 @@ window.showHistDetail=i=>{
       <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 参加者</div><div class="val">${(h.count.am.hs||0)+(h.count.am.intl||0)}</div></div><div class="stat"><div class="label">午前 付き添い</div><div class="val">${h.count.am.par||0}</div></div><div class="stat"><div class="label">午後 参加者</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.intl||0)}</div></div><div class="stat"><div class="label">午後 付き添い</div><div class="val">${h.count.pm.par||0}</div></div></div>
       <div class="sec-hd">学科別記録</div>${deptRows}
       ${(h.notices||[]).length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
-      <button class="btn-outline" onclick="document.getElementById('hist-detail').style.display='none'" style="margin-top:10px;">閉じる</button>
+      <button class="btn-outline" onclick="closeHistDetail()" style="margin-top:10px;">閉じる</button>
     </div>`;
 };
 
@@ -195,7 +197,14 @@ window.deleteHist=i=>{
   if(!confirm('履歴が削除されます。よろしいですか？'))return;
   if(state.history[i]) state.history[i].deleted=true;
   saveHistory();
+  if(vars.selectedHistIdx===i) closeHistDetail();
+  else renderHistList();
+};
+
+window.closeHistDetail=()=>{
+  vars.selectedHistIdx=null;
   document.getElementById('hist-detail').style.display='none';
+  renderHistList();
 };
 
 window.moveSchedPage=delta=>{

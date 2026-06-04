@@ -259,8 +259,11 @@ export function renderAdmin(){
         <div class="chk-col"><div class="chk-col-label">午後</div><input type="checkbox" ${state.depts[d.code]&&state.depts[d.code].skipPm?'checked':''} onchange="toggleSkipPm('${d.code}',this.checked)"></div>
       </div>
     </div>`).join('');
+  renderHistList();
+}
+
+export function renderHistList(){
   const history=state.history||[];
-  // 削除フラグのないエントリのみ表示。元インデックスを保持する
   const active=history.map((h,i)=>({...h,_i:i})).filter(h=>!h.deleted);
   const shown=vars.histLimit>0?active.slice(0,vars.histLimit):active;
   const limBtns=[3,5,10,0].map(n=>{
@@ -273,17 +276,19 @@ export function renderAdmin(){
       ${limBtns}
       <span style="font-size:12px;color:var(--color-text-secondary);">${active.length}件中 ${shown.length}件表示</span>
     </div>
-    ${shown.length?shown.map(h=>`
-      <div class="hist-item">
+    ${shown.length?shown.map(h=>{
+      const isSel=h._i===vars.selectedHistIdx;
+      return `<div class="hist-item" style="${isSel?'background:#E6F1FB;border-left:3px solid #185FA5;padding-left:11px;':''}">
         <div>
           <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${formatDate(h.date)}</div>
           <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">高校生 ${(h.count.am.hs||0)+(h.count.pm.hs||0)}名 保護者 ${(h.count.am.par||0)+(h.count.pm.par||0)}名 留学生 ${(h.count.am.intl||0)+(h.count.pm.intl||0)}名 合計 ${(h.count.am.hs||0)+(h.count.am.par||0)+(h.count.am.intl||0)+(h.count.pm.hs||0)+(h.count.pm.par||0)+(h.count.pm.intl||0)}名</div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;">
-          <button class="step-btn" onclick="showHistDetail(${h._i})">詳細</button>
+          <button class="step-btn${isSel?' current':''}" onclick="showHistDetail(${h._i})">詳細${isSel?' ▼':''}</button>
           <button class="step-btn" onclick="deleteHist(${h._i})" style="color:#A32D2D;border-color:#EF9F27;">削除</button>
         </div>
-      </div>`).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>'}
+      </div>`;
+    }).join(''):'<div style="font-size:13px;color:var(--color-text-secondary);">まだ履歴はありません</div>'}
   `;
 }
 
