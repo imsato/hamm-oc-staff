@@ -159,15 +159,28 @@ window.showHistDetail=i=>{
     const am=h.depts[d.code].am,pm=h.depts[d.code].pm,sAm=h.depts[d.code].skipAm,sPm=h.depts[d.code].skipPm;
     return`<div style="padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
       <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);">午前: ${sAm?'対象外':STEPS[am.step]+(am.doneTime?' 完了'+am.doneTime:'')+' 高'+am.hs+'名 保'+am.par+'名 相談'+am.consult+' ツアー'+am.tour}</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);">午後: ${sPm?'対象外':STEPS[pm.step]+(pm.doneTime?' 完了'+pm.doneTime:'')+' 高'+pm.hs+'名 保'+pm.par+'名 相談'+pm.consult+' ツアー'+pm.tour}</div>
+      <div style="display:flex;gap:10px;font-size:12px;color:var(--color-text-secondary);flex-wrap:wrap;">${sAm?'午前: 対象外':`<span>午前: ${STEPS[am.step]}${am.doneTime?' '+am.doneTime:''}</span><span>高${am.hs}名</span><span>保${am.par}名</span><span>留${am.intl||0}名</span>`}</div>
+      <div style="display:flex;gap:10px;font-size:12px;color:var(--color-text-secondary);flex-wrap:wrap;">${sPm?'午後: 対象外':`<span>午後: ${STEPS[pm.step]}${pm.doneTime?' '+pm.doneTime:''}</span><span>高${pm.hs}名</span><span>保${pm.par}名</span><span>留${pm.intl||0}名</span>`}</div>
     </div>`;}).join('');
   const noticeRows=(h.notices||[]).map(n=>`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);"><span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${n.author}</span> <span style="font-size:11px;color:var(--color-text-secondary);">${n.time} [${tLabel[n.tag]||'通知'}]</span><div style="font-size:13px;color:var(--color-text-primary);">${n.text}</div></div>`).join('');
   document.getElementById('hist-detail').style.display='block';
   document.getElementById('hist-detail').innerHTML=`
     <div class="card">
       <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary);">${formatDate(h.date)} 詳細</div>
-      <div class="stat-grid" style="margin-bottom:10px;"><div class="stat"><div class="label">午前 参加者</div><div class="val">${(h.count.am.hs||0)+(h.count.am.intl||0)}</div></div><div class="stat"><div class="label">午前 付き添い</div><div class="val">${h.count.am.par||0}</div></div><div class="stat"><div class="label">午後 参加者</div><div class="val">${(h.count.pm.hs||0)+(h.count.pm.intl||0)}</div></div><div class="stat"><div class="label">午後 付き添い</div><div class="val">${h.count.pm.par||0}</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;">
+          <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;">午前</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">高校生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.am.hs||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">付き添い</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.am.par||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--color-text-secondary);">留学生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.am.intl||0}名</span></div>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;">
+          <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;">午後</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">高校生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.pm.hs||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">付き添い</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.pm.par||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--color-text-secondary);">留学生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.pm.intl||0}名</span></div>
+        </div>
+      </div>
       <div class="sec-hd">学科別記録</div>${deptRows}
       ${(h.notices||[]).length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
       <div style="display:flex;gap:8px;margin-top:10px;">
