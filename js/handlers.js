@@ -170,15 +170,15 @@ window.showHistDetail=i=>{
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
         <div style="background:#E6F1FB;border-radius:var(--border-radius-md);padding:12px;">
           <div style="font-size:11px;font-weight:500;color:#0C447C;margin-bottom:8px;">午前</div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">高校生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.am.hs||0}名</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">付き添い</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.am.par||0}名</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--color-text-secondary);">留学生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.am.intl||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:#0C447C;">高校生</span><span style="font-weight:500;color:#0C447C;">${h.count.am.hs||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:#0C447C;">付き添い</span><span style="font-weight:500;color:#0C447C;">${h.count.am.par||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:#0C447C;">留学生</span><span style="font-weight:500;color:#0C447C;">${h.count.am.intl||0}名</span></div>
         </div>
         <div style="background:#FAEEDA;border-radius:var(--border-radius-md);padding:12px;">
           <div style="font-size:11px;font-weight:500;color:#633806;margin-bottom:8px;">午後</div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">高校生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.pm.hs||0}名</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--color-text-secondary);">付き添い</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.pm.par||0}名</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--color-text-secondary);">留学生</span><span style="font-weight:500;color:var(--color-text-primary);">${h.count.pm.intl||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:#633806;">高校生</span><span style="font-weight:500;color:#633806;">${h.count.pm.hs||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:#633806;">付き添い</span><span style="font-weight:500;color:#633806;">${h.count.pm.par||0}名</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:#633806;">留学生</span><span style="font-weight:500;color:#633806;">${h.count.pm.intl||0}名</span></div>
         </div>
       </div>
       <div class="sec-hd">学科別記録</div>${deptRows}
