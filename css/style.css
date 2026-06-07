@@ -155,3 +155,6 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 /* 連絡板：Goodボタン */
 .good-btn{padding:4px 10px;border-radius:100px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-secondary);}
 .good-btn:active{background:var(--color-background-secondary);}
+/* 連絡板：削除ボタン */
+.notice-del-btn{padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid #EF9F27;background:transparent;color:#A32D2D;cursor:pointer;}
+.notice-del-btn:active{background:#FCEBEB;}

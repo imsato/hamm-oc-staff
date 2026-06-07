@@ -151,6 +151,13 @@ window.goodNotice=i=>{
   saveNotices();
 };
 
+window.deleteNotice=i=>{
+  if(!confirm('この投稿を削除しますか？'))return;
+  if(!state.notices[i])return;
+  state.notices[i].deleted=true;
+  saveNotices();
+};
+
 window.addSched=()=>{
   const d=document.getElementById('new-date').value,m=document.getElementById('new-memo').value;
   if(!d)return;

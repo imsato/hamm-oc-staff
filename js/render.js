@@ -180,16 +180,21 @@ export function renderCount(){
 export function renderNotices(){
   const tMap={urgent:'badge-urgent',info:'badge-info',complete:'badge-complete'};
   const tLabel={urgent:'緊急',info:'通知',complete:'完了'};
-  document.getElementById('notices-list').innerHTML=(state.notices||[]).map((n,i)=>`
+  const items=(state.notices||[]).map((n,i)=>n.deleted?'':(`
     <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${n.author}</span><span style="font-size:12px;color:var(--color-text-secondary);">${n.time}</span></div>
       <div style="font-size:14px;line-height:1.6;color:var(--color-text-primary);">${n.text}</div>
       ${n.photo?`<img src="${n.photo}" class="notice-photo-thumb" onclick="openNoticePhoto(${i})" alt="添付写真">`:''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
         <span class="badge ${tMap[n.tag]||'badge-info'}">${tLabel[n.tag]||'通知'}</span>
-        <button class="good-btn" onclick="goodNotice(${i})"><i class="ti ti-thumb-up" style="font-size:13px;vertical-align:-2px;margin-right:3px;"></i>${n.goods>0?n.goods+'件':'Good'}</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="notice-del-btn" onclick="deleteNotice(${i})"><i class="ti ti-trash" style="font-size:13px;vertical-align:-2px;"></i></button>
+          <button class="good-btn" onclick="goodNotice(${i})"><i class="ti ti-thumb-up" style="font-size:13px;vertical-align:-2px;margin-right:3px;"></i>${n.goods>0?n.goods+'件':'Good'}</button>
+        </div>
       </div>
-    </div>`).join('')||'<div style="font-size:13px;color:var(--color-text-secondary);padding:12px 0;">まだ投稿はありません</div>';
+    </div>`)).join('');
+  const hasVisible=items.replace(/\s/g,'').length>0;
+  document.getElementById('notices-list').innerHTML=hasVisible?items:'<div style="font-size:13px;color:var(--color-text-secondary);padding:12px 0;">まだ投稿はありません</div>';
 }
 
 export function renderAdminDongseiPreview(){
