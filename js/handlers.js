@@ -80,12 +80,75 @@ window.toggleFixed=(part,checkbox)=>{
 
 window.selTag=t=>{vars.noticeTag=t;['urgent','info','complete'].forEach(x=>document.getElementById('tg-'+x).classList.toggle('sel',x===t));};
 
+// 写真リサイズ（Canvas API）
+function resizeImageToDataUrl(file,maxDim,quality,cb){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxDim||h>maxDim){
+        if(w>=h){h=Math.round(h*maxDim/w);w=maxDim;}
+        else{w=Math.round(w*maxDim/h);h=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      cb(canvas.toDataURL('image/jpeg',quality));
+    };
+    img.onerror=()=>cb(null);
+    img.src=e.target.result;
+  };
+  reader.onerror=()=>cb(null);
+  reader.readAsDataURL(file);
+}
+
+function clearNoticePhoto(){
+  vars.noticePhotoData=null;
+  const preview=document.getElementById('notice-photo-preview');
+  const img=document.getElementById('notice-photo-img');
+  if(preview)preview.style.display='none';
+  if(img)img.src='';
+}
+
+window.uploadNoticePhoto=input=>{
+  const file=input.files[0];if(!file)return;
+  resizeImageToDataUrl(file,1200,0.80,dataUrl=>{
+    if(!dataUrl){alert('画像の読み込みに失敗しました');input.value='';return;}
+    vars.noticePhotoData=dataUrl;
+    const preview=document.getElementById('notice-photo-preview');
+    const img=document.getElementById('notice-photo-img');
+    img.src=dataUrl;
+    preview.style.display='block';
+    input.value='';
+  });
+};
+
+window.removeNoticePhoto=clearNoticePhoto;
+
+window.openNoticePhoto=i=>{
+  const n=(state.notices||[])[i];if(!n||!n.photo)return;
+  const w=window.open('','_blank');
+  w.document.write(`<html><body style="margin:0;background:#111;"><img src="${n.photo}" style="max-width:100%;height:auto;display:block;"></body></html>`);
+  w.document.close();
+};
+
 window.postNotice=()=>{
   const name=(document.getElementById('notice-name').value||'').trim()||'名前未入力';
   const text=(document.getElementById('notice-text').value||'').trim();
   if(!text)return;
-  state.notices.unshift({author:name,text,tag:vars.noticeTag,time:getNow()});
-  document.getElementById('notice-text').value='';saveNotices();
+  const notice={id:'n'+Date.now(),author:name,text,tag:vars.noticeTag,time:getNow(),goods:0};
+  if(vars.noticePhotoData)notice.photo=vars.noticePhotoData;
+  state.notices.unshift(notice);
+  document.getElementById('notice-text').value='';
+  clearNoticePhoto();
+  saveNotices();
+};
+
+window.goodNotice=i=>{
+  if(!state.notices[i])return;
+  state.notices[i].goods=(state.notices[i].goods||0)+1;
+  saveNotices();
 };
 
 window.addSched=()=>{

@@ -228,6 +228,16 @@
   <div class="compose">
     <input class="name-input" id="notice-name" placeholder="発信者名を入力..."/>
     <textarea id="notice-text" placeholder="スタッフへの連絡事項..." rows="3"></textarea>
+    <div style="margin-top:8px;">
+      <label for="notice-photo-input" class="notice-photo-label">
+        <i class="ti ti-camera" style="font-size:14px;vertical-align:-2px;margin-right:4px;"></i>写真を添付（任意）
+      </label>
+      <input type="file" id="notice-photo-input" accept="image/*" style="display:none;" onchange="uploadNoticePhoto(this)">
+      <div id="notice-photo-preview" style="display:none;">
+        <img id="notice-photo-img" class="notice-photo-prev-img" alt="プレビュー">
+        <button class="notice-photo-cancel" onclick="removeNoticePhoto()"><i class="ti ti-x" style="font-size:13px;vertical-align:-1px;margin-right:3px;"></i>取消</button>
+      </div>
+    </div>
     <div class="compose-foot">
       <div class="tag-row">
         <button class="tag-opt" id="tg-urgent" onclick="selTag('urgent')"><i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-1px"></i> 緊急</button>

@@ -27,7 +27,8 @@ export const vars = {
   saving: false,
   histLimit: 5,       // 履歴表示件数（0=すべて）
   schedOffset: -1,    // 開催日リスト表示開始位置（-1=最終ページ自動）
-  selectedHistIdx: null // 詳細表示中の履歴インデックス
+  selectedHistIdx: null, // 詳細表示中の履歴インデックス
+  noticePhotoData: null  // 連絡板：投稿前の添付写真（Base64）
 };
 
 export function clone(x){return JSON.parse(JSON.stringify(x));}
