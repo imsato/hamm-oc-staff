@@ -232,7 +232,18 @@ window.showHistDetail=i=>{
       <div style="display:flex;gap:10px;font-size:12px;color:var(--color-text-secondary);flex-wrap:wrap;">${sAm?'午前: 対象外':`<span>午前: ${STEPS[am.step]}${am.doneTime?' '+am.doneTime:''}</span><span style="font-weight:500;color:var(--color-text-primary);">高${am.hs}名</span><span style="font-weight:500;color:var(--color-text-primary);">保${am.par}名</span><span style="font-weight:500;color:var(--color-text-primary);">留${am.intl||0}名</span>`}</div>
       <div style="display:flex;gap:10px;font-size:12px;color:var(--color-text-secondary);flex-wrap:wrap;">${sPm?'午後: 対象外':`<span>午後: ${STEPS[pm.step]}${pm.doneTime?' '+pm.doneTime:''}</span><span style="font-weight:500;color:var(--color-text-primary);">高${pm.hs}名</span><span style="font-weight:500;color:var(--color-text-primary);">保${pm.par}名</span><span style="font-weight:500;color:var(--color-text-primary);">留${pm.intl||0}名</span>`}</div>
     </div>`;}).join('');
-  const noticeRows=(h.notices||[]).map(n=>`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);"><span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${n.author}</span> <span style="font-size:11px;color:var(--color-text-secondary);">${n.time} [${tLabel[n.tag]||'通知'}]</span><div style="font-size:13px;color:var(--color-text-primary);">${n.text}</div></div>`).join('');
+  const noticeRows=(h.notices||[]).map(n=>{
+    const isDel=!!n.deleted;
+    const delBadge=isDel?`<span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">削除済み</span>`:'';
+    return`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);${isDel?'opacity:0.55;':''}">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:2px;">
+        <span style="font-size:12px;font-weight:500;color:var(--color-text-secondary);">${n.author}</span>
+        <span style="font-size:11px;color:var(--color-text-secondary);">${n.time} [${tLabel[n.tag]||'通知'}]</span>
+        ${delBadge}
+      </div>
+      <div style="font-size:13px;${isDel?'color:var(--color-text-secondary);text-decoration:line-through;':'color:var(--color-text-primary);'}">${n.text}</div>
+    </div>`;
+  }).join('');
   document.getElementById('hist-detail').style.display='block';
   document.getElementById('hist-detail').innerHTML=`
     <div class="card">
