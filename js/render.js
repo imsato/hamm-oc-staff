@@ -345,12 +345,24 @@ export function renderReports(){
       <div style="font-size:12px;color:var(--color-text-secondary);">確定 ${submittedCount}件 ／ 退避 ${draftCount}件 ／ 未提出 ${DEPTS.length-submittedCount-draftCount}件</div>
       <button class="step-btn" onclick="printReports()"><i class="ti ti-printer" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>全学科印刷</button>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px;">
       ${DEPTS.map(d=>{
         const rpt=reports[d.code]||{};
         const cls=rpt.status==='submitted'?'rpt-chip rpt-chip-done':rpt.status==='draft'?'rpt-chip rpt-chip-draft':'rpt-chip';
         return`<button class="${cls}" onclick="showReportDetail('${d.code}')">${d.code}</button>`;
       }).join('')}
+    </div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+      <span style="font-size:11px;color:var(--color-text-secondary);font-weight:500;">凡例：</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary);">
+        <span style="width:13px;height:13px;border-radius:3px;background:#FFF3CD;border:0.5px solid #856404;display:inline-block;flex-shrink:0;"></span>日報入力中
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary);">
+        <span style="width:13px;height:13px;border-radius:3px;background:#D4EDDA;border:0.5px solid #27500A;display:inline-block;flex-shrink:0;"></span>日報提出完了
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary);">
+        <span style="width:13px;height:13px;border-radius:3px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);display:inline-block;flex-shrink:0;"></span>未提出
+      </span>
     </div>
     <div id="rpt-admin-detail" style="display:none;"></div>
   `;

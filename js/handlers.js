@@ -411,10 +411,10 @@ window.printReports=()=>{
   const pmRvP=rv.pmPart||0,pmRvG=rv.pmGuardian||0,pmRvI=rv.pmIntl||0;
   const countSummary=`<table class="ct">
     <tr><th></th><th>高校生</th><th>保護者</th><th>留学生</th><th>合計</th></tr>
-    <tr><td>午前　予約</td><td>${amRvP}</td><td>${amRvG}</td><td>${amRvI}</td><td>${amRvP+amRvG+amRvI}</td></tr>
-    <tr><td>午前　来場</td><td>${amHs}</td><td>${amPar}</td><td>${amIntl}</td><td>${amHs+amPar+amIntl}</td></tr>
-    <tr><td>午後　予約</td><td>${pmRvP}</td><td>${pmRvG}</td><td>${pmRvI}</td><td>${pmRvP+pmRvG+pmRvI}</td></tr>
-    <tr><td>午後　来場</td><td>${pmHs}</td><td>${pmPar}</td><td>${pmIntl}</td><td>${pmHs+pmPar+pmIntl}</td></tr>
+    <tr class="rv-row"><td>午前　予約</td><td>${amRvP}</td><td>${amRvG}</td><td>${amRvI}</td><td>${amRvP+amRvG+amRvI}</td></tr>
+    <tr class="visit-row"><td>午前　来場</td><td>${amHs}</td><td>${amPar}</td><td>${amIntl}</td><td>${amHs+amPar+amIntl}</td></tr>
+    <tr class="rv-row"><td>午後　予約</td><td>${pmRvP}</td><td>${pmRvG}</td><td>${pmRvI}</td><td>${pmRvP+pmRvG+pmRvI}</td></tr>
+    <tr class="visit-row"><td>午後　来場</td><td>${pmHs}</td><td>${pmPar}</td><td>${pmIntl}</td><td>${pmHs+pmPar+pmIntl}</td></tr>
     <tr class="tot"><td>本日合計（来場）</td><td>${amHs+pmHs}</td><td>${amPar+pmPar}</td><td>${amIntl+pmIntl}</td><td>${amHs+amPar+amIntl+pmHs+pmPar+pmIntl}</td></tr>
   </table>`;
   const rows=DEPTS.map(d=>{
@@ -447,6 +447,10 @@ window.printReports=()=>{
     .ct th{background:#f0f0f0;font-weight:600;}
     .ct td:first-child{text-align:left;}
     .tot{font-weight:bold;background:#e8e8e8;}
+    .rv-row td{color:#aaa;font-size:11px;}
+    .rv-row td:first-child{font-size:11px;}
+    .visit-row td{font-weight:700;font-size:14px;}
+    .visit-row td:first-child{font-size:13px;font-weight:700;}
     .summary-block{margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #333;}
   </style>
   </head><body>
