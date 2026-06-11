@@ -401,11 +401,26 @@ window.showReportDetail=code=>{
 window.printReports=()=>{
   const reports=state.reports||{};
   const sessionDate=formatDate(state.session.date)||'日付未設定';
+  const esc2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // 来場者・予約人数サマリー
+  const rv=state.session.reservation||{};
+  const cnt=state.count||{am:{},pm:{}};
+  const amHs=cnt.am.hs||0,amPar=cnt.am.par||0,amIntl=cnt.am.intl||0;
+  const pmHs=cnt.pm.hs||0,pmPar=cnt.pm.par||0,pmIntl=cnt.pm.intl||0;
+  const amRvP=rv.amPart||0,amRvG=rv.amGuardian||0,amRvI=rv.amIntl||0;
+  const pmRvP=rv.pmPart||0,pmRvG=rv.pmGuardian||0,pmRvI=rv.pmIntl||0;
+  const countSummary=`<table class="ct">
+    <tr><th></th><th>高校生</th><th>保護者</th><th>留学生</th><th>合計</th></tr>
+    <tr><td>午前　予約</td><td>${amRvP}</td><td>${amRvG}</td><td>${amRvI}</td><td>${amRvP+amRvG+amRvI}</td></tr>
+    <tr><td>午前　来場</td><td>${amHs}</td><td>${amPar}</td><td>${amIntl}</td><td>${amHs+amPar+amIntl}</td></tr>
+    <tr><td>午後　予約</td><td>${pmRvP}</td><td>${pmRvG}</td><td>${pmRvI}</td><td>${pmRvP+pmRvG+pmRvI}</td></tr>
+    <tr><td>午後　来場</td><td>${pmHs}</td><td>${pmPar}</td><td>${pmIntl}</td><td>${pmHs+pmPar+pmIntl}</td></tr>
+    <tr class="tot"><td>本日合計（来場）</td><td>${amHs+pmHs}</td><td>${amPar+pmPar}</td><td>${amIntl+pmIntl}</td><td>${amHs+amPar+amIntl+pmHs+pmPar+pmIntl}</td></tr>
+  </table>`;
   const rows=DEPTS.map(d=>{
     const rpt=reports[d.code];
     const dp_am=state.depts[d.code]&&state.depts[d.code].am||{};
     const dp_pm=state.depts[d.code]&&state.depts[d.code].pm||{};
-    const esc2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     if(!rpt||!rpt.status)return`<div class="pd"><h3>${d.code}：${d.name}</h3><p class="ns">未提出</p></div>`;
     return`<div class="pd">
       <h3>${d.code}：${d.name} <span class="ts">${rpt.status==='submitted'?'確定 '+rpt.submittedAt:'退避 '+rpt.savedAt}</span></h3>
@@ -417,10 +432,30 @@ window.printReports=()=>{
     </div>`;
   }).join('');
   const html=`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>OC実施報告 ${sessionDate}</title>
-  <style>body{font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;margin:0;padding:20px;}h1{font-size:16px;margin-bottom:4px;}h3{font-size:14px;margin:0 0 6px;padding:6px 0;border-bottom:1px solid #999;}p{margin:4px 0;white-space:pre-wrap;}.pd{margin-bottom:24px;padding-bottom:8px;border-bottom:2px solid #333;page-break-inside:avoid;}.ts{font-size:11px;color:#666;font-weight:normal;}.ns{color:#999;}.sub{font-size:12px;color:#555;margin-bottom:12px;}</style>
+  <style>
+    body{font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;margin:0;padding:20px;}
+    h1{font-size:16px;margin-bottom:4px;}
+    h2{font-size:13px;margin:0 0 6px;font-weight:600;}
+    h3{font-size:14px;margin:0 0 6px;padding:6px 0;border-bottom:1px solid #999;}
+    p{margin:4px 0;white-space:pre-wrap;}
+    .pd{margin-bottom:24px;padding-bottom:8px;border-bottom:2px solid #333;page-break-inside:avoid;}
+    .ts{font-size:11px;color:#666;font-weight:normal;}
+    .ns{color:#999;}
+    .sub{font-size:12px;color:#555;margin-bottom:8px;}
+    .ct{width:100%;border-collapse:collapse;margin-bottom:20px;}
+    .ct th,.ct td{padding:5px 8px;border:0.5px solid #ccc;text-align:center;font-size:12px;}
+    .ct th{background:#f0f0f0;font-weight:600;}
+    .ct td:first-child{text-align:left;}
+    .tot{font-weight:bold;background:#e8e8e8;}
+    .summary-block{margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #333;}
+  </style>
   </head><body>
   <h1>浜松未来総合専門学校　オープンキャンパス実施報告</h1>
   <p class="sub">実施日：${sessionDate}</p>
+  <div class="summary-block">
+    <h2>来場者数サマリー</h2>
+    ${countSummary}
+  </div>
   ${rows}</body></html>`;
   const w=window.open('','_blank');
   w.document.write(html);

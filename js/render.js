@@ -345,7 +345,7 @@ export function renderReports(){
       <div style="font-size:12px;color:var(--color-text-secondary);">確定 ${submittedCount}件 ／ 退避 ${draftCount}件 ／ 未提出 ${DEPTS.length-submittedCount-draftCount}件</div>
       <button class="step-btn" onclick="printReports()"><i class="ti ti-printer" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>全学科印刷</button>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;">
       ${DEPTS.map(d=>{
         const rpt=reports[d.code]||{};
         const cls=rpt.status==='submitted'?'rpt-chip rpt-chip-done':rpt.status==='draft'?'rpt-chip rpt-chip-draft':'rpt-chip';
