@@ -135,7 +135,47 @@ export function renderDepts(){
     const consultBadge=dp.consult>0?`<span class="badge badge-urgent" style="margin-left:2px;font-size:11px;">${dp.consult}名</span>`:`${dp.consult}名`;
     const tourBadge=dp.tour>0?`<span class="badge badge-info" style="margin-left:2px;font-size:11px;">${dp.tour}名</span>`:`${dp.tour}名`;
     const info=(!skip&&step>=1)?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">高校生 ${dp.hs}名 保護者 ${dp.par}名 留学生 ${dp.intl||0}名 ／ 相談 ${consultBadge} ツアー ${tourBadge}${dp.doneTime?' ／ 完了 '+dp.doneTime:''}</div>`:'';
-    return`<div class="dept-card"><div class="dept-header"><div class="dept-name">${d.code}：${d.name}</div>${badge}</div>${info}${inputHtml}${stepBtns}</div>`;
+    // 日報フォーム
+    const rpt=(state.reports&&state.reports[d.code])||{};
+    const rptBadge=rpt.status==='submitted'
+      ?`<span class="badge rpt-badge-done" style="margin-left:2px;">日報済</span>`
+      :rpt.status==='draft'
+      ?`<span class="badge rpt-badge-draft" style="margin-left:2px;">日報中</span>`:'';
+    const isExpanded=!!(vars.reportExpanded&&vars.reportExpanded[d.code]);
+    const rptToggleBtn=`<div class="rpt-toggle-wrap"><button class="step-btn" onclick="toggleReportForm('${d.code}')" style="width:100%;text-align:center;"><i class="ti ti-file-text" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>日報入力 ${isExpanded?'▲':'▼'}</button></div>`;
+    const cache=(vars.reportCache&&vars.reportCache[d.code])||{};
+    const dp_r_am=state.depts[d.code].am,dp_r_pm=state.depts[d.code].pm;
+    const amSurveyVal=cache.amSurvey!==undefined?cache.amSurvey:(rpt.amSurvey||'');
+    const pmSurveyVal=cache.pmSurvey!==undefined?cache.pmSurvey:(rpt.pmSurvey||'');
+    const lessonVal=cache.lesson!==undefined?cache.lesson:(rpt.lesson||'');
+    const situationVal=cache.situation!==undefined?cache.situation:(rpt.situation||'');
+    const rptForm=isExpanded?`<div class="rpt-form">
+  <div class="rpt-auto-row"><i class="ti ti-calendar" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>${formatDate(state.session.date)||'実施日未設定'}</div>
+  <div class="rpt-sec-label" style="margin-top:8px;">参加者（進行入力より自動）</div>
+  <div class="rpt-auto-row">午前　高校生 ${dp_r_am.hs||0}名　保護者 ${dp_r_am.par||0}名　留学生 ${dp_r_am.intl||0}名</div>
+  <div class="rpt-auto-row">午後　高校生 ${dp_r_pm.hs||0}名　保護者 ${dp_r_pm.par||0}名　留学生 ${dp_r_pm.intl||0}名</div>
+  <div class="rpt-section">
+    <div class="rpt-sec-label">アンケート志望状況</div>
+    <div class="rpt-label">午前</div>
+    <textarea class="rpt-textarea" id="rpt-amsurvey-${d.code}" placeholder="例：本校希望8名/他校1/未定3" rows="2" oninput="cacheReportField('${d.code}','amSurvey',this.value)">${esc(amSurveyVal)}</textarea>
+    <div class="rpt-label" style="margin-top:6px;">午後</div>
+    <textarea class="rpt-textarea" id="rpt-pmsurvey-${d.code}" placeholder="例：AOエントリー予定1名" rows="2" oninput="cacheReportField('${d.code}','pmSurvey',this.value)">${esc(pmSurveyVal)}</textarea>
+  </div>
+  <div class="rpt-section">
+    <div class="rpt-sec-label">授業内容（午前午後共通）</div>
+    <textarea class="rpt-textarea" id="rpt-lesson-${d.code}" placeholder="体験授業の内容を入力" rows="3" oninput="cacheReportField('${d.code}','lesson',this.value)">${esc(lessonVal)}</textarea>
+  </div>
+  <div class="rpt-section">
+    <div class="rpt-sec-label">参加者の状況</div>
+    <textarea class="rpt-textarea" id="rpt-situation-${d.code}" placeholder="参加者の反応・質問・個別状況など" rows="4" oninput="cacheReportField('${d.code}','situation',this.value)">${esc(situationVal)}</textarea>
+  </div>
+  ${rpt.savedAt||rpt.submittedAt?`<div style="font-size:11px;color:var(--color-text-secondary);margin:4px 0;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>`:''}
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <button class="btn-outline" onclick="saveDraftReport('${d.code}')" style="flex:1;">一時退避</button>
+    <button class="btn-primary" onclick="submitReport('${d.code}')" style="flex:1;margin-top:0;">確定して提出</button>
+  </div>
+</div>`:'';
+    return`<div class="dept-card"><div class="dept-header"><div class="dept-name">${d.code}：${d.name}</div><div style="display:flex;gap:4px;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end;">${badge}${rptBadge}</div></div>${info}${inputHtml}${stepBtns}${rptToggleBtn}${rptForm}</div>`;
   }).join('');
 }
 
@@ -285,6 +325,38 @@ export function renderAdmin(){
       </div>
     </div>`).join('');
   renderHistList();
+  renderReports();
+}
+
+export function renderReports(){
+  const el=document.getElementById('admin-report');
+  if(!el)return;
+  const reports=state.reports||{};
+  const submittedCount=DEPTS.filter(d=>reports[d.code]&&reports[d.code].status==='submitted').length;
+  const draftCount=DEPTS.filter(d=>reports[d.code]&&reports[d.code].status==='draft').length;
+  el.innerHTML=`
+    <div class="sec-hd">日報一覧</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-size:12px;color:var(--color-text-secondary);">確定 ${submittedCount}件 ／ 退避 ${draftCount}件 ／ 未提出 ${DEPTS.length-submittedCount-draftCount}件</div>
+      <button class="step-btn" onclick="printReports()"><i class="ti ti-printer" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>全学科印刷</button>
+    </div>
+    ${DEPTS.map(d=>{
+      const rpt=reports[d.code]||{};
+      const statusHtml=rpt.status==='submitted'
+        ?`<span class="badge rpt-badge-done">確定 ${rpt.submittedAt}</span>`
+        :rpt.status==='draft'
+        ?`<span class="badge rpt-badge-draft">退避 ${rpt.savedAt}</span>`
+        :`<span style="font-size:12px;color:var(--color-text-secondary);">未提出</span>`;
+      return`<div class="rpt-admin-row">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
+          <div style="margin-top:4px;">${statusHtml}</div>
+        </div>
+        ${rpt.status?`<button class="step-btn" onclick="showReportDetail('${d.code}')">詳細</button>`:''}
+      </div>`;
+    }).join('')}
+    <div id="rpt-admin-detail" style="display:none;margin-top:10px;"></div>
+  `;
 }
 
 export function renderHistList(){

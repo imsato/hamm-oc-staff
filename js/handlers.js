@@ -1,5 +1,5 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
-import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory } from './state.js';
+import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory, saveReports } from './state.js';
 import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin, renderHistList } from './render.js';
 
 window.showProgPart=p=>{
@@ -186,12 +186,17 @@ window.startSession=()=>{
   if(!confirm('開催を開始しますか？当日のデータがリセットされます。'))return;
   state.session.active=true;
   DEPT_KEYS.forEach(k=>{state.depts[k].am=newDP();state.depts[k].pm=newDP();});
-  state.count={am:{hs:0,par:0,intl:0,fixed:false},pm:{hs:0,par:0,intl:0,fixed:false}};state.notices=[];saveState();
+  state.count={am:{hs:0,par:0,intl:0,fixed:false},pm:{hs:0,par:0,intl:0,fixed:false}};
+  state.notices=[];
+  state.reports={};
+  vars.reportExpanded={};
+  vars.reportCache={};
+  saveState();
 };
 
 window.endSession=()=>{
   if(!confirm('開催を終了して履歴に保存しますか？'))return;
-  state.history.unshift({date:state.session.date,id:'h'+Date.now(),count:clone(state.count),depts:clone(state.depts),notices:clone(state.notices),partMode:state.session.partMode});
+  state.history.unshift({date:state.session.date,id:'h'+Date.now(),count:clone(state.count),depts:clone(state.depts),notices:clone(state.notices),partMode:state.session.partMode,reports:clone(state.reports)});
   state.session.active=false;saveState();
 };
 
@@ -264,6 +269,30 @@ window.showHistDetail=i=>{
       </div>
       <div class="sec-hd">学科別記録</div>${deptRows}
       ${(h.notices||[]).length?`<div class="sec-hd" style="margin-top:10px;">連絡板</div>${noticeRows}`:''}
+      ${(()=>{
+        const rpts=h.reports;
+        if(!rpts)return'';
+        const submitted=DEPTS.filter(d=>rpts[d.code]&&rpts[d.code].status==='submitted');
+        if(!submitted.length)return'';
+        const esc2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return`<div class="sec-hd" style="margin-top:10px;">日報（${submitted.length}学科提出）</div>
+          ${submitted.map(d=>{
+            const r=rpts[d.code];
+            const am=h.depts&&h.depts[d.code]&&h.depts[d.code].am||{};
+            const pm=h.depts&&h.depts[d.code]&&h.depts[d.code].pm||{};
+            return`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
+                <span style="font-size:11px;color:var(--color-text-secondary);">確定 ${r.submittedAt}</span>
+              </div>
+              <div style="font-size:11px;color:var(--color-text-secondary);">午前 高${am.hs||0}名 保${am.par||0}名 留${am.intl||0}名 ／ 午後 高${pm.hs||0}名 保${pm.par||0}名 留${pm.intl||0}名</div>
+              ${r.amSurvey?`<div style="font-size:12px;color:var(--color-text-primary);margin-top:2px;">AM：${esc2(r.amSurvey)}</div>`:''}
+              ${r.pmSurvey?`<div style="font-size:12px;color:var(--color-text-primary);">PM：${esc2(r.pmSurvey)}</div>`:''}
+              ${r.lesson?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">授業：${esc2(r.lesson)}</div>`:''}
+              ${r.situation?`<div style="font-size:12px;color:var(--color-text-secondary);">状況：${esc2(r.situation)}</div>`:''}
+            </div>`;
+          }).join('')}`;
+      })()}
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button class="btn-outline" onclick="closeHistDetail()" style="flex:1;">閉じる</button>
         <button class="btn-outline" onclick="deleteHist(${i})" style="flex:1;color:#A32D2D;border-color:#EF9F27;">この履歴を削除</button>
@@ -282,7 +311,7 @@ window.showTab=name=>{
 
 window.showDeptPart=p=>{vars.deptPartManual=p;vars.deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();};
 window.showCountPart=p=>{vars.deptPartManual=p;document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');};
-window.showAdminPart=p=>{['sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';};
+window.showAdminPart=p=>{['report','sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';};
 
 window.setHistLimit=n=>{
   vars.histLimit=n;
@@ -302,6 +331,95 @@ window.closeHistDetail=()=>{
   vars.selectedHistIdx=null;
   document.getElementById('hist-detail').style.display='none';
   renderHistList();
+};
+
+// ===== 日報機能 =====
+window.cacheReportField=(code,field,value)=>{
+  if(!vars.reportCache)vars.reportCache={};
+  if(!vars.reportCache[code])vars.reportCache[code]={};
+  vars.reportCache[code][field]=value;
+};
+
+window.toggleReportForm=code=>{
+  if(!vars.reportExpanded)vars.reportExpanded={};
+  vars.reportExpanded[code]=!vars.reportExpanded[code];
+  renderDepts();
+};
+
+window.saveDraftReport=code=>{
+  const amSurvey=(document.getElementById('rpt-amsurvey-'+code)||{}).value||'';
+  const pmSurvey=(document.getElementById('rpt-pmsurvey-'+code)||{}).value||'';
+  const lesson=(document.getElementById('rpt-lesson-'+code)||{}).value||'';
+  const situation=(document.getElementById('rpt-situation-'+code)||{}).value||'';
+  if(!state.reports)state.reports={};
+  state.reports[code]={...(state.reports[code]||{}),amSurvey,pmSurvey,lesson,situation,savedAt:getNow(),status:'draft'};
+  if(vars.reportCache)delete vars.reportCache[code];
+  saveReports();
+};
+
+window.submitReport=code=>{
+  if(!confirm('日報を確定して提出しますか？'))return;
+  const amSurvey=(document.getElementById('rpt-amsurvey-'+code)||{}).value||'';
+  const pmSurvey=(document.getElementById('rpt-pmsurvey-'+code)||{}).value||'';
+  const lesson=(document.getElementById('rpt-lesson-'+code)||{}).value||'';
+  const situation=(document.getElementById('rpt-situation-'+code)||{}).value||'';
+  if(!state.reports)state.reports={};
+  const prev=state.reports[code]||{};
+  state.reports[code]={...prev,amSurvey,pmSurvey,lesson,situation,savedAt:prev.savedAt||getNow(),submittedAt:getNow(),status:'submitted'};
+  if(vars.reportCache)delete vars.reportCache[code];
+  saveReports();
+};
+
+window.showReportDetail=code=>{
+  const rpt=(state.reports&&state.reports[code])||{};
+  const dept=DEPTS.find(d=>d.code===code)||{name:code};
+  const dp_am=state.depts[code]&&state.depts[code].am||{};
+  const dp_pm=state.depts[code]&&state.depts[code].pm||{};
+  const el=document.getElementById('rpt-admin-detail');
+  if(!el)return;
+  el.style.display='block';
+  const row=(label,val)=>val?`<div style="margin-bottom:8px;"><div class="rpt-sec-label">${label}</div><div class="rpt-detail-text">${String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`:'';
+  el.innerHTML=`<div class="card">
+    <div style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary);">${code}：${dept.name}</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>
+    <div class="rpt-sec-label">参加者</div>
+    <div class="rpt-auto-row">午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名</div>
+    <div class="rpt-auto-row" style="margin-bottom:8px;">午後　高校生 ${dp_pm.hs||0}名　保護者 ${dp_pm.par||0}名　留学生 ${dp_pm.intl||0}名</div>
+    ${row('アンケート志望状況（午前）',rpt.amSurvey)}
+    ${row('アンケート志望状況（午後）',rpt.pmSurvey)}
+    ${row('授業内容',rpt.lesson)}
+    ${row('参加者の状況',rpt.situation)}
+    <button class="btn-outline" onclick="document.getElementById('rpt-admin-detail').style.display='none'" style="margin-top:8px;">閉じる</button>
+  </div>`;
+};
+
+window.printReports=()=>{
+  const reports=state.reports||{};
+  const sessionDate=formatDate(state.session.date)||'日付未設定';
+  const rows=DEPTS.map(d=>{
+    const rpt=reports[d.code];
+    const dp_am=state.depts[d.code]&&state.depts[d.code].am||{};
+    const dp_pm=state.depts[d.code]&&state.depts[d.code].pm||{};
+    const esc2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if(!rpt||!rpt.status)return`<div class="pd"><h3>${d.code}：${d.name}</h3><p class="ns">未提出</p></div>`;
+    return`<div class="pd">
+      <h3>${d.code}：${d.name} <span class="ts">${rpt.status==='submitted'?'確定 '+rpt.submittedAt:'退避 '+rpt.savedAt}</span></h3>
+      <p><b>【参加者】</b><br>午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名<br>午後　高校生 ${dp_pm.hs||0}名　保護者 ${dp_pm.par||0}名　留学生 ${dp_pm.intl||0}名</p>
+      ${rpt.amSurvey||rpt.pmSurvey?`<p><b>【アンケート志望状況】</b><br>AM：${esc2(rpt.amSurvey)}<br>PM：${esc2(rpt.pmSurvey)}</p>`:''}
+      ${rpt.lesson?`<p><b>【授業内容】</b><br>${esc2(rpt.lesson)}</p>`:''}
+      ${rpt.situation?`<p><b>【参加者の状況】</b><br>${esc2(rpt.situation)}</p>`:''}
+    </div>`;
+  }).join('');
+  const html=`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>OC実施報告 ${sessionDate}</title>
+  <style>body{font-family:-apple-system,sans-serif;font-size:13px;line-height:1.7;margin:0;padding:20px;}h1{font-size:16px;margin-bottom:4px;}h3{font-size:14px;margin:0 0 6px;padding:6px 0;border-bottom:1px solid #999;}p{margin:4px 0;white-space:pre-wrap;}.pd{margin-bottom:24px;padding-bottom:8px;border-bottom:2px solid #333;page-break-inside:avoid;}.ts{font-size:11px;color:#666;font-weight:normal;}.ns{color:#999;}.sub{font-size:12px;color:#555;margin-bottom:12px;}</style>
+  </head><body>
+  <h1>浜松未来総合専門学校　オープンキャンパス実施報告</h1>
+  <p class="sub">実施日：${sessionDate}</p>
+  ${rows}</body></html>`;
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
 };
 
 window.moveSchedPage=delta=>{

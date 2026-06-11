@@ -13,7 +13,8 @@ export const state = {
   schedules: [],
   session: {active:false,date:'',id:'',partMode:'both',amTl:null,pmTl:null,dongseiUrl:'',
     reservation:{amPart:0,amGuardian:0,pmPart:0,pmGuardian:0}},
-  history: []
+  history: [],
+  reports: {}
 };
 
 // ミュータブルなUI状態をオブジェクトにまとめて共有する
@@ -28,7 +29,9 @@ export const vars = {
   histLimit: 5,       // 履歴表示件数（0=すべて）
   schedOffset: -1,    // 開催日リスト表示開始位置（-1=最終ページ自動）
   selectedHistIdx: null, // 詳細表示中の履歴インデックス
-  noticePhotoData: null  // 連絡板：投稿前の添付写真（Base64）
+  noticePhotoData: null,  // 連絡板：投稿前の添付写真（Base64）
+  reportExpanded: {},     // 日報フォーム展開状態 {deptCode: bool}
+  reportCache: {}         // 日報入力中の一時キャッシュ {deptCode: {field: value}}
 };
 
 export function clone(x){return JSON.parse(JSON.stringify(x));}
@@ -47,6 +50,7 @@ export function mergeFromFirebase(data) {
   if (Array.isArray(data.notices)) state.notices = data.notices;
   if (Array.isArray(data.schedules)) state.schedules = data.schedules;
   if (Array.isArray(data.history)) state.history = data.history;
+  if (data.reports && typeof data.reports === 'object') state.reports = data.reports;
   if (data.session && typeof data.session === 'object') {
     state.session = data.session;
   }
@@ -95,6 +99,7 @@ export function ensureDefaults() {
   if (!Array.isArray(state.notices)) state.notices = [];
   if (!Array.isArray(state.schedules)) state.schedules = [];
   if (!Array.isArray(state.history)) state.history = [];
+  if (!state.reports || typeof state.reports !== 'object') state.reports = {};
 }
 
 export function setSyncOk(ok){
@@ -147,4 +152,8 @@ export function saveSchedules(){
 
 export function saveHistory(){
   savePath('history', state.history);
+}
+
+export function saveReports(){
+  savePath('reports', state.reports);
 }

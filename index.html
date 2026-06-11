@@ -259,10 +259,12 @@
   <div class="warn-banner"><i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0;margin-top:1px;"></i><span>この画面は管理用です。過去の開催履歴を参照することができます。開催スケジュール登録や開催当日の選択など入力操作は運営管理者のみが行ってください。</span></div>
   <div class="tab-seg">
     <button class="seg-btn active" onclick="showAdminPart('hist')" id="as-hist">過去履歴</button>
+    <button class="seg-btn" onclick="showAdminPart('report')" id="as-report">日報</button>
     <button class="seg-btn" onclick="showAdminPart('sched')" id="as-sched" style="border-left:1px solid var(--color-border-secondary);"><i class="ti ti-lock" style="font-size:13px;vertical-align:-2px;margin-right:2px;color:#C05C00;"></i>開催日</button>
     <button class="seg-btn" onclick="showAdminPart('tl')" id="as-tl"><i class="ti ti-lock" style="font-size:13px;vertical-align:-2px;margin-right:2px;color:#C05C00;"></i>スケジュール</button>
     <button class="seg-btn" onclick="showAdminPart('dept')" id="as-dept"><i class="ti ti-lock" style="font-size:13px;vertical-align:-2px;margin-right:2px;color:#C05C00;"></i>開催学科</button>
   </div>
+  <div id="admin-report" style="display:none;"></div>
   <div id="admin-sched" style="display:none;">
     <div class="sec-hd">年間開催スケジュール</div>
     <div id="sched-list"></div>

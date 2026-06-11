@@ -158,3 +158,21 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 /* 連絡板：削除ボタン */
 .notice-del-btn{padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid #EF9F27;background:transparent;color:#A32D2D;cursor:pointer;}
 .notice-del-btn:active{background:#FCEBEB;}
+/* 日報機能：バッジ */
+.rpt-badge-done{background:#D4EDDA;color:#27500A;}
+.rpt-badge-draft{background:#FFF3CD;color:#856404;}
+@media(prefers-color-scheme:dark){
+  .rpt-badge-done{background:#27500A;color:#D4EDDA;}
+  .rpt-badge-draft{background:#856404;color:#FFF3CD;}
+}
+/* 日報機能：学科カード内フォーム */
+.rpt-toggle-wrap{border-top:0.5px solid var(--color-border-tertiary);padding-top:8px;margin-top:8px;}
+.rpt-form{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;margin-top:8px;}
+.rpt-section{margin-top:10px;}
+.rpt-sec-label{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px;}
+.rpt-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;}
+.rpt-textarea{width:100%;padding:7px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);line-height:1.5;resize:vertical;outline:none;}
+.rpt-auto-row{font-size:12px;color:var(--color-text-primary);padding:3px 0;}
+/* 日報機能：管理タブ一覧・詳細 */
+.rpt-admin-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.rpt-detail-text{font-size:13px;color:var(--color-text-primary);white-space:pre-wrap;line-height:1.6;}
