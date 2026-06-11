@@ -138,19 +138,24 @@ export function renderDepts(){
     // 日報フォーム
     const rpt=(state.reports&&state.reports[d.code])||{};
     const rptBadge=rpt.status==='submitted'
-      ?`<span class="badge rpt-badge-done" style="margin-left:2px;">日報済</span>`
+      ?`<span class="badge rpt-badge-done" style="margin-left:2px;">日報完了</span>`
       :rpt.status==='draft'
-      ?`<span class="badge rpt-badge-draft" style="margin-left:2px;">日報中</span>`:'';
+      ?`<span class="badge rpt-badge-draft" style="margin-left:2px;">日報入力中</span>`:'';
     const isExpanded=!!(vars.reportExpanded&&vars.reportExpanded[d.code]);
     const rptToggleBtn=`<div class="rpt-toggle-wrap"><button class="step-btn" onclick="toggleReportForm('${d.code}')" style="width:100%;text-align:center;"><i class="ti ti-file-text" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>日報入力 ${isExpanded?'▲':'▼'}</button></div>`;
     const cache=(vars.reportCache&&vars.reportCache[d.code])||{};
     const dp_r_am=state.depts[d.code].am,dp_r_pm=state.depts[d.code].pm;
+    const reporterVal=cache.reporter!==undefined?cache.reporter:(rpt.reporter||'');
     const amSurveyVal=cache.amSurvey!==undefined?cache.amSurvey:(rpt.amSurvey||'');
     const pmSurveyVal=cache.pmSurvey!==undefined?cache.pmSurvey:(rpt.pmSurvey||'');
     const lessonVal=cache.lesson!==undefined?cache.lesson:(rpt.lesson||'');
     const situationVal=cache.situation!==undefined?cache.situation:(rpt.situation||'');
     const rptForm=isExpanded?`<div class="rpt-form">
-  <div class="rpt-auto-row"><i class="ti ti-calendar" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>${formatDate(state.session.date)||'実施日未設定'}</div>
+  <div class="rpt-section">
+    <div class="rpt-sec-label">報告者 <span style="color:#A32D2D;">※必須</span></div>
+    <input type="text" class="rpt-input" id="rpt-reporter-${d.code}" placeholder="氏名を入力（必須）" value="${esc(reporterVal)}" oninput="cacheReportField('${d.code}','reporter',this.value)">
+  </div>
+  <div class="rpt-auto-row" style="margin-top:8px;"><i class="ti ti-calendar" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>${formatDate(state.session.date)||'実施日未設定'}</div>
   <div class="rpt-sec-label" style="margin-top:8px;">参加者（進行入力より自動）</div>
   <div class="rpt-auto-row">午前　高校生 ${dp_r_am.hs||0}名　保護者 ${dp_r_am.par||0}名　留学生 ${dp_r_am.intl||0}名</div>
   <div class="rpt-auto-row">午後　高校生 ${dp_r_pm.hs||0}名　保護者 ${dp_r_pm.par||0}名　留学生 ${dp_r_pm.intl||0}名</div>
@@ -340,22 +345,14 @@ export function renderReports(){
       <div style="font-size:12px;color:var(--color-text-secondary);">確定 ${submittedCount}件 ／ 退避 ${draftCount}件 ／ 未提出 ${DEPTS.length-submittedCount-draftCount}件</div>
       <button class="step-btn" onclick="printReports()"><i class="ti ti-printer" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>全学科印刷</button>
     </div>
-    ${DEPTS.map(d=>{
-      const rpt=reports[d.code]||{};
-      const statusHtml=rpt.status==='submitted'
-        ?`<span class="badge rpt-badge-done">確定 ${rpt.submittedAt}</span>`
-        :rpt.status==='draft'
-        ?`<span class="badge rpt-badge-draft">退避 ${rpt.savedAt}</span>`
-        :`<span style="font-size:12px;color:var(--color-text-secondary);">未提出</span>`;
-      return`<div class="rpt-admin-row">
-        <div>
-          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
-          <div style="margin-top:4px;">${statusHtml}</div>
-        </div>
-        ${rpt.status?`<button class="step-btn" onclick="showReportDetail('${d.code}')">詳細</button>`:''}
-      </div>`;
-    }).join('')}
-    <div id="rpt-admin-detail" style="display:none;margin-top:10px;"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+      ${DEPTS.map(d=>{
+        const rpt=reports[d.code]||{};
+        const cls=rpt.status==='submitted'?'rpt-chip rpt-chip-done':rpt.status==='draft'?'rpt-chip rpt-chip-draft':'rpt-chip';
+        return`<button class="${cls}" onclick="showReportDetail('${d.code}')">${d.code}</button>`;
+      }).join('')}
+    </div>
+    <div id="rpt-admin-detail" style="display:none;"></div>
   `;
 }
 

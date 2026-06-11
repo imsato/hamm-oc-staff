@@ -282,7 +282,7 @@ window.showHistDetail=i=>{
             const pm=h.depts&&h.depts[d.code]&&h.depts[d.code].pm||{};
             return`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}${r.reporter?' （'+esc2(r.reporter)+'）':''}</div>
                 <span style="font-size:11px;color:var(--color-text-secondary);">確定 ${r.submittedAt}</span>
               </div>
               <div style="font-size:11px;color:var(--color-text-secondary);">午前 高${am.hs||0}名 保${am.par||0}名 留${am.intl||0}名 ／ 午後 高${pm.hs||0}名 保${pm.par||0}名 留${pm.intl||0}名</div>
@@ -347,17 +347,20 @@ window.toggleReportForm=code=>{
 };
 
 window.saveDraftReport=code=>{
+  const reporter=(document.getElementById('rpt-reporter-'+code)||{}).value||'';
   const amSurvey=(document.getElementById('rpt-amsurvey-'+code)||{}).value||'';
   const pmSurvey=(document.getElementById('rpt-pmsurvey-'+code)||{}).value||'';
   const lesson=(document.getElementById('rpt-lesson-'+code)||{}).value||'';
   const situation=(document.getElementById('rpt-situation-'+code)||{}).value||'';
   if(!state.reports)state.reports={};
-  state.reports[code]={...(state.reports[code]||{}),amSurvey,pmSurvey,lesson,situation,savedAt:getNow(),status:'draft'};
+  state.reports[code]={...(state.reports[code]||{}),reporter,amSurvey,pmSurvey,lesson,situation,savedAt:getNow(),status:'draft'};
   if(vars.reportCache)delete vars.reportCache[code];
   saveReports();
 };
 
 window.submitReport=code=>{
+  const reporter=(document.getElementById('rpt-reporter-'+code)||{}).value||'';
+  if(!reporter.trim()){alert('報告者名を入力してください（必須）');return;}
   if(!confirm('日報を確定して提出しますか？'))return;
   const amSurvey=(document.getElementById('rpt-amsurvey-'+code)||{}).value||'';
   const pmSurvey=(document.getElementById('rpt-pmsurvey-'+code)||{}).value||'';
@@ -365,7 +368,7 @@ window.submitReport=code=>{
   const situation=(document.getElementById('rpt-situation-'+code)||{}).value||'';
   if(!state.reports)state.reports={};
   const prev=state.reports[code]||{};
-  state.reports[code]={...prev,amSurvey,pmSurvey,lesson,situation,savedAt:prev.savedAt||getNow(),submittedAt:getNow(),status:'submitted'};
+  state.reports[code]={...prev,reporter,amSurvey,pmSurvey,lesson,situation,savedAt:prev.savedAt||getNow(),submittedAt:getNow(),status:'submitted'};
   if(vars.reportCache)delete vars.reportCache[code];
   saveReports();
 };
@@ -380,8 +383,9 @@ window.showReportDetail=code=>{
   el.style.display='block';
   const row=(label,val)=>val?`<div style="margin-bottom:8px;"><div class="rpt-sec-label">${label}</div><div class="rpt-detail-text">${String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`:'';
   el.innerHTML=`<div class="card">
-    <div style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary);">${code}：${dept.name}</div>
-    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary);">${code}：${dept.name}</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>
+    ${rpt.reporter?`<div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;padding:6px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">報告者：${String(rpt.reporter).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}
     <div class="rpt-sec-label">参加者</div>
     <div class="rpt-auto-row">午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名</div>
     <div class="rpt-auto-row" style="margin-bottom:8px;">午後　高校生 ${dp_pm.hs||0}名　保護者 ${dp_pm.par||0}名　留学生 ${dp_pm.intl||0}名</div>
@@ -391,6 +395,7 @@ window.showReportDetail=code=>{
     ${row('参加者の状況',rpt.situation)}
     <button class="btn-outline" onclick="document.getElementById('rpt-admin-detail').style.display='none'" style="margin-top:8px;">閉じる</button>
   </div>`;
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
 };
 
 window.printReports=()=>{
@@ -404,6 +409,7 @@ window.printReports=()=>{
     if(!rpt||!rpt.status)return`<div class="pd"><h3>${d.code}：${d.name}</h3><p class="ns">未提出</p></div>`;
     return`<div class="pd">
       <h3>${d.code}：${d.name} <span class="ts">${rpt.status==='submitted'?'確定 '+rpt.submittedAt:'退避 '+rpt.savedAt}</span></h3>
+      ${rpt.reporter?`<p><b>報告者：</b>${esc2(rpt.reporter)}</p>`:''}
       <p><b>【参加者】</b><br>午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名<br>午後　高校生 ${dp_pm.hs||0}名　保護者 ${dp_pm.par||0}名　留学生 ${dp_pm.intl||0}名</p>
       ${rpt.amSurvey||rpt.pmSurvey?`<p><b>【アンケート志望状況】</b><br>AM：${esc2(rpt.amSurvey)}<br>PM：${esc2(rpt.pmSurvey)}</p>`:''}
       ${rpt.lesson?`<p><b>【授業内容】</b><br>${esc2(rpt.lesson)}</p>`:''}

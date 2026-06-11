@@ -176,3 +176,14 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 /* 日報機能：管理タブ一覧・詳細 */
 .rpt-admin-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
 .rpt-detail-text{font-size:13px;color:var(--color-text-primary);white-space:pre-wrap;line-height:1.6;}
+/* 日報機能：提出状況チップ */
+.rpt-chip{padding:7px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:12px;font-weight:500;cursor:pointer;color:var(--color-text-secondary);}
+.rpt-chip:active{opacity:0.75;}
+.rpt-chip-done{background:#D4EDDA;color:#27500A;border-color:#27500A;}
+.rpt-chip-draft{background:#FFF3CD;color:#856404;border-color:#856404;}
+@media(prefers-color-scheme:dark){
+  .rpt-chip-done{background:#27500A;color:#D4EDDA;border-color:#4A8A30;}
+  .rpt-chip-draft{background:#6B500A;color:#FFF3CD;border-color:#A07820;}
+}
+/* 日報機能：報告者入力欄 */
+.rpt-input{width:100%;padding:8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;}
