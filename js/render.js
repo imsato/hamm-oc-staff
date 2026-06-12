@@ -180,9 +180,9 @@ export function renderDepts(){
     <div class="rpt-sec-label">KPT（Keep / Problem / Try）</div>
     <textarea class="rpt-textarea" id="rpt-kpt-${d.code}" placeholder="意識した点、工夫した点、問題点、やってよかった、次にやりたい" rows="3" oninput="cacheReportField('${d.code}','kpt',this.value)">${esc(kptVal)}</textarea>
   </div>
-  ${rpt.savedAt||rpt.submittedAt?`<div style="font-size:11px;color:var(--color-text-secondary);margin:4px 0;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>`:''}
+  ${rpt.savedAt||rpt.submittedAt?`<div style="font-size:11px;color:var(--color-text-secondary);margin:4px 0;">${rpt.savedAt?'一時保存: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>`:''}
   <div style="display:flex;gap:8px;margin-top:8px;">
-    <button class="btn-outline" onclick="saveDraftReport('${d.code}')" style="flex:1;">一時退避</button>
+    <button class="btn-outline" onclick="saveDraftReport('${d.code}')" style="flex:1;">一時保存</button>
     <button class="btn-primary" onclick="submitReport('${d.code}')" style="flex:1;margin-top:0;">確定して提出</button>
   </div>
 </div>`:'';

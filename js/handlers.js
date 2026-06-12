@@ -387,7 +387,7 @@ window.showReportDetail=code=>{
   const row=(label,val)=>val?`<div style="margin-bottom:8px;"><div class="rpt-sec-label">${label}</div><div class="rpt-detail-text">${String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`:'';
   el.innerHTML=`<div class="card">
     <div style="font-size:14px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary);">${code}：${dept.name}</div>
-    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">${rpt.savedAt?'一時保存: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>
     ${rpt.reporter?`<div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;padding:6px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">報告者：${String(rpt.reporter).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}
     <div class="rpt-sec-label">参加者</div>
     <div class="rpt-auto-row">午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名</div>
