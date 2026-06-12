@@ -282,12 +282,13 @@ window.showHistDetail=i=>{
             const pm=h.depts&&h.depts[d.code]&&h.depts[d.code].pm||{};
             return`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}${r.reporter?' （'+esc2(r.reporter)+'）':''}</div>
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">${d.code}：${d.name}</div>
                 <span style="font-size:11px;color:var(--color-text-secondary);">確定 ${r.submittedAt}</span>
               </div>
+              ${r.reporter?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">報告者：${esc2(r.reporter)}</div>`:''}
               <div style="font-size:11px;color:var(--color-text-secondary);">午前 高${am.hs||0}名 保${am.par||0}名 留${am.intl||0}名 ／ 午後 高${pm.hs||0}名 保${pm.par||0}名 留${pm.intl||0}名</div>
               ${r.location?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">場所：${esc2(r.location)}</div>`:''}
-              ${r.survey?`<div style="font-size:12px;color:var(--color-text-primary);margin-top:2px;">志望：${esc2(r.survey)}</div>`:''}
+              ${r.survey?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">志望：${esc2(r.survey)}</div>`:''}
               ${r.lesson?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">授業：${esc2(r.lesson)}</div>`:''}
               ${r.situation?`<div style="font-size:12px;color:var(--color-text-secondary);">状況：${esc2(r.situation)}</div>`:''}
               ${r.kpt?`<div style="font-size:12px;color:var(--color-text-secondary);">KPT：${esc2(r.kpt)}</div>`:''}
