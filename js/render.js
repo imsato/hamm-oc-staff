@@ -146,33 +146,39 @@ export function renderDepts(){
     const cache=(vars.reportCache&&vars.reportCache[d.code])||{};
     const dp_r_am=state.depts[d.code].am,dp_r_pm=state.depts[d.code].pm;
     const reporterVal=cache.reporter!==undefined?cache.reporter:(rpt.reporter||'');
-    const amSurveyVal=cache.amSurvey!==undefined?cache.amSurvey:(rpt.amSurvey||'');
-    const pmSurveyVal=cache.pmSurvey!==undefined?cache.pmSurvey:(rpt.pmSurvey||'');
+    const locationVal=cache.location!==undefined?cache.location:(rpt.location||'');
+    const surveyVal=cache.survey!==undefined?cache.survey:(rpt.survey||'');
     const lessonVal=cache.lesson!==undefined?cache.lesson:(rpt.lesson||'');
     const situationVal=cache.situation!==undefined?cache.situation:(rpt.situation||'');
+    const kptVal=cache.kpt!==undefined?cache.kpt:(rpt.kpt||'');
     const rptForm=isExpanded?`<div class="rpt-form">
   <div class="rpt-section">
-    <div class="rpt-sec-label">報告者 <span style="color:#A32D2D;">※必須</span></div>
-    <input type="text" class="rpt-input" id="rpt-reporter-${d.code}" placeholder="氏名を入力（必須）" value="${esc(reporterVal)}" oninput="cacheReportField('${d.code}','reporter',this.value)">
+    <div class="rpt-sec-label">報告者</div>
+    <input type="text" class="rpt-input" id="rpt-reporter-${d.code}" placeholder="氏名を入力" value="${esc(reporterVal)}" oninput="cacheReportField('${d.code}','reporter',this.value)">
   </div>
   <div class="rpt-auto-row" style="margin-top:8px;"><i class="ti ti-calendar" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>${formatDate(state.session.date)||'実施日未設定'}</div>
   <div class="rpt-sec-label" style="margin-top:8px;">参加者（進行入力より自動）</div>
   <div class="rpt-auto-row">午前　高校生 ${dp_r_am.hs||0}名　保護者 ${dp_r_am.par||0}名　留学生 ${dp_r_am.intl||0}名</div>
   <div class="rpt-auto-row">午後　高校生 ${dp_r_pm.hs||0}名　保護者 ${dp_r_pm.par||0}名　留学生 ${dp_r_pm.intl||0}名</div>
   <div class="rpt-section">
-    <div class="rpt-sec-label">アンケート志望状況</div>
-    <div class="rpt-label">午前</div>
-    <textarea class="rpt-textarea" id="rpt-amsurvey-${d.code}" placeholder="例：本校希望8名/他校1/未定3" rows="2" oninput="cacheReportField('${d.code}','amSurvey',this.value)">${esc(amSurveyVal)}</textarea>
-    <div class="rpt-label" style="margin-top:6px;">午後</div>
-    <textarea class="rpt-textarea" id="rpt-pmsurvey-${d.code}" placeholder="例：AOエントリー予定1名" rows="2" oninput="cacheReportField('${d.code}','pmSurvey',this.value)">${esc(pmSurveyVal)}</textarea>
+    <div class="rpt-sec-label">実施場所</div>
+    <input type="text" class="rpt-input" id="rpt-location-${d.code}" placeholder="○○教室" value="${esc(locationVal)}" style="max-width:180px;" oninput="cacheReportField('${d.code}','location',this.value)">
   </div>
   <div class="rpt-section">
-    <div class="rpt-sec-label">授業内容（午前午後共通）</div>
-    <textarea class="rpt-textarea" id="rpt-lesson-${d.code}" placeholder="体験授業の内容を入力" rows="3" oninput="cacheReportField('${d.code}','lesson',this.value)">${esc(lessonVal)}</textarea>
+    <div class="rpt-sec-label">アンケート志望状況</div>
+    <textarea class="rpt-textarea" id="rpt-survey-${d.code}" placeholder="本校希望人数や出願（AO）傾向" rows="4" oninput="cacheReportField('${d.code}','survey',this.value)">${esc(surveyVal)}</textarea>
+  </div>
+  <div class="rpt-section">
+    <div class="rpt-sec-label">授業内容</div>
+    <textarea class="rpt-textarea" id="rpt-lesson-${d.code}" placeholder="授業内容、参加者の反応" rows="4" oninput="cacheReportField('${d.code}','lesson',this.value)">${esc(lessonVal)}</textarea>
   </div>
   <div class="rpt-section">
     <div class="rpt-sec-label">参加者の状況</div>
-    <textarea class="rpt-textarea" id="rpt-situation-${d.code}" placeholder="参加者の反応・質問・個別状況など" rows="4" oninput="cacheReportField('${d.code}','situation',this.value)">${esc(situationVal)}</textarea>
+    <textarea class="rpt-textarea" id="rpt-situation-${d.code}" placeholder="参加者個人ごと　状況、質問応答、個別対応" rows="4" oninput="cacheReportField('${d.code}','situation',this.value)">${esc(situationVal)}</textarea>
+  </div>
+  <div class="rpt-section">
+    <div class="rpt-sec-label">KPT（Keep / Problem / Try）</div>
+    <textarea class="rpt-textarea" id="rpt-kpt-${d.code}" placeholder="意識した点、工夫した点、問題点、やってよかった、次にやりたい" rows="3" oninput="cacheReportField('${d.code}','kpt',this.value)">${esc(kptVal)}</textarea>
   </div>
   ${rpt.savedAt||rpt.submittedAt?`<div style="font-size:11px;color:var(--color-text-secondary);margin:4px 0;">${rpt.savedAt?'一時退避: '+rpt.savedAt:''}${rpt.submittedAt?' ／ 確定: '+rpt.submittedAt:''}</div>`:''}
   <div style="display:flex;gap:8px;margin-top:8px;">

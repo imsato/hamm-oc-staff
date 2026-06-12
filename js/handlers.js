@@ -286,10 +286,11 @@ window.showHistDetail=i=>{
                 <span style="font-size:11px;color:var(--color-text-secondary);">確定 ${r.submittedAt}</span>
               </div>
               <div style="font-size:11px;color:var(--color-text-secondary);">午前 高${am.hs||0}名 保${am.par||0}名 留${am.intl||0}名 ／ 午後 高${pm.hs||0}名 保${pm.par||0}名 留${pm.intl||0}名</div>
-              ${r.amSurvey?`<div style="font-size:12px;color:var(--color-text-primary);margin-top:2px;">AM：${esc2(r.amSurvey)}</div>`:''}
-              ${r.pmSurvey?`<div style="font-size:12px;color:var(--color-text-primary);">PM：${esc2(r.pmSurvey)}</div>`:''}
+              ${r.location?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">場所：${esc2(r.location)}</div>`:''}
+              ${r.survey?`<div style="font-size:12px;color:var(--color-text-primary);margin-top:2px;">志望：${esc2(r.survey)}</div>`:''}
               ${r.lesson?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">授業：${esc2(r.lesson)}</div>`:''}
               ${r.situation?`<div style="font-size:12px;color:var(--color-text-secondary);">状況：${esc2(r.situation)}</div>`:''}
+              ${r.kpt?`<div style="font-size:12px;color:var(--color-text-secondary);">KPT：${esc2(r.kpt)}</div>`:''}
             </div>`;
           }).join('')}`;
       })()}
@@ -348,12 +349,13 @@ window.toggleReportForm=code=>{
 
 window.saveDraftReport=code=>{
   const reporter=(document.getElementById('rpt-reporter-'+code)||{}).value||'';
-  const amSurvey=(document.getElementById('rpt-amsurvey-'+code)||{}).value||'';
-  const pmSurvey=(document.getElementById('rpt-pmsurvey-'+code)||{}).value||'';
+  const location=(document.getElementById('rpt-location-'+code)||{}).value||'';
+  const survey=(document.getElementById('rpt-survey-'+code)||{}).value||'';
   const lesson=(document.getElementById('rpt-lesson-'+code)||{}).value||'';
   const situation=(document.getElementById('rpt-situation-'+code)||{}).value||'';
+  const kpt=(document.getElementById('rpt-kpt-'+code)||{}).value||'';
   if(!state.reports)state.reports={};
-  state.reports[code]={...(state.reports[code]||{}),reporter,amSurvey,pmSurvey,lesson,situation,savedAt:getNow(),status:'draft'};
+  state.reports[code]={...(state.reports[code]||{}),reporter,location,survey,lesson,situation,kpt,savedAt:getNow(),status:'draft'};
   if(vars.reportCache)delete vars.reportCache[code];
   saveReports();
 };
@@ -362,13 +364,14 @@ window.submitReport=code=>{
   const reporter=(document.getElementById('rpt-reporter-'+code)||{}).value||'';
   if(!reporter.trim()){alert('報告者名を入力してください（必須）');return;}
   if(!confirm('日報を確定して提出しますか？'))return;
-  const amSurvey=(document.getElementById('rpt-amsurvey-'+code)||{}).value||'';
-  const pmSurvey=(document.getElementById('rpt-pmsurvey-'+code)||{}).value||'';
+  const location=(document.getElementById('rpt-location-'+code)||{}).value||'';
+  const survey=(document.getElementById('rpt-survey-'+code)||{}).value||'';
   const lesson=(document.getElementById('rpt-lesson-'+code)||{}).value||'';
   const situation=(document.getElementById('rpt-situation-'+code)||{}).value||'';
+  const kpt=(document.getElementById('rpt-kpt-'+code)||{}).value||'';
   if(!state.reports)state.reports={};
   const prev=state.reports[code]||{};
-  state.reports[code]={...prev,reporter,amSurvey,pmSurvey,lesson,situation,savedAt:prev.savedAt||getNow(),submittedAt:getNow(),status:'submitted'};
+  state.reports[code]={...prev,reporter,location,survey,lesson,situation,kpt,savedAt:prev.savedAt||getNow(),submittedAt:getNow(),status:'submitted'};
   if(vars.reportCache)delete vars.reportCache[code];
   saveReports();
 };
@@ -389,10 +392,11 @@ window.showReportDetail=code=>{
     <div class="rpt-sec-label">参加者</div>
     <div class="rpt-auto-row">午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名</div>
     <div class="rpt-auto-row" style="margin-bottom:8px;">午後　高校生 ${dp_pm.hs||0}名　保護者 ${dp_pm.par||0}名　留学生 ${dp_pm.intl||0}名</div>
-    ${row('アンケート志望状況（午前）',rpt.amSurvey)}
-    ${row('アンケート志望状況（午後）',rpt.pmSurvey)}
+    ${row('実施場所',rpt.location)}
+    ${row('アンケート志望状況',rpt.survey)}
     ${row('授業内容',rpt.lesson)}
     ${row('参加者の状況',rpt.situation)}
+    ${row('KPT',rpt.kpt)}
     <button class="btn-outline" onclick="document.getElementById('rpt-admin-detail').style.display='none'" style="margin-top:8px;">閉じる</button>
   </div>`;
   setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
@@ -426,9 +430,11 @@ window.printReports=()=>{
       <h3>${d.code}：${d.name} <span class="ts">${rpt.status==='submitted'?'確定 '+rpt.submittedAt:'退避 '+rpt.savedAt}</span></h3>
       ${rpt.reporter?`<p><b>報告者：</b>${esc2(rpt.reporter)}</p>`:''}
       <p><b>【参加者】</b><br>午前　高校生 ${dp_am.hs||0}名　保護者 ${dp_am.par||0}名　留学生 ${dp_am.intl||0}名<br>午後　高校生 ${dp_pm.hs||0}名　保護者 ${dp_pm.par||0}名　留学生 ${dp_pm.intl||0}名</p>
-      ${rpt.amSurvey||rpt.pmSurvey?`<p><b>【アンケート志望状況】</b><br>AM：${esc2(rpt.amSurvey)}<br>PM：${esc2(rpt.pmSurvey)}</p>`:''}
+      ${rpt.location?`<p><b>【実施場所】</b>　${esc2(rpt.location)}</p>`:''}
+      ${rpt.survey?`<p><b>【アンケート志望状況】</b><br>${esc2(rpt.survey)}</p>`:''}
       ${rpt.lesson?`<p><b>【授業内容】</b><br>${esc2(rpt.lesson)}</p>`:''}
       ${rpt.situation?`<p><b>【参加者の状況】</b><br>${esc2(rpt.situation)}</p>`:''}
+      ${rpt.kpt?`<p><b>【KPT】</b><br>${esc2(rpt.kpt)}</p>`:''}
     </div>`;
   }).join('');
   const html=`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>OC実施報告 ${sessionDate}</title>
