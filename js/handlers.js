@@ -252,7 +252,11 @@ window.showHistDetail=i=>{
   document.getElementById('hist-detail').style.display='block';
   document.getElementById('hist-detail').innerHTML=`
     <div class="card">
-      <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary);">${formatDate(h.date)} 詳細</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:8px;color:var(--color-text-primary);">${formatDate(h.date)} 詳細</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button class="btn-outline" onclick="closeHistDetail()" style="flex:1;">閉じる</button>
+        <button class="btn-outline" onclick="deleteHist(${i})" style="flex:1;color:#A32D2D;border-color:#EF9F27;">この履歴を削除</button>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
         <div style="background:#E6F1FB;border-radius:var(--border-radius-md);padding:12px;">
           <div style="font-size:11px;font-weight:500;color:#0C447C;margin-bottom:8px;">午前</div>
