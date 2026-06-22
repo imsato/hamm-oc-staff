@@ -364,7 +364,8 @@ window.saveDraftReport=code=>{
 window.submitReport=code=>{
   const reporter=(document.getElementById('rpt-reporter-'+code)||{}).value||'';
   if(!reporter.trim()){alert('報告者名を入力してください（必須）');return;}
-  if(!confirm('日報を確定して提出しますか？'))return;
+  const deptName=(DEPTS.find(d=>d.code===code)||{name:code}).name;
+  if(!confirm(`${code}：${deptName}\n日報を確定して提出しますか？`))return;
   const location=(document.getElementById('rpt-location-'+code)||{}).value||'';
   const survey=(document.getElementById('rpt-survey-'+code)||{}).value||'';
   const lesson=(document.getElementById('rpt-lesson-'+code)||{}).value||'';
