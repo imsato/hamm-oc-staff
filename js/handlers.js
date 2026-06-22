@@ -1,5 +1,5 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
-import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory, saveReports } from './state.js';
+import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory, saveReport } from './state.js';
 import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin, renderHistList } from './render.js';
 
 window.showProgPart=p=>{
@@ -358,7 +358,7 @@ window.saveDraftReport=code=>{
   if(!state.reports)state.reports={};
   state.reports[code]={...(state.reports[code]||{}),reporter,location,survey,lesson,situation,kpt,savedAt:getNow(),status:'draft'};
   if(vars.reportCache)delete vars.reportCache[code];
-  saveReports();
+  saveReport(code);
 };
 
 window.submitReport=code=>{
@@ -374,7 +374,7 @@ window.submitReport=code=>{
   const prev=state.reports[code]||{};
   state.reports[code]={...prev,reporter,location,survey,lesson,situation,kpt,savedAt:prev.savedAt||getNow(),submittedAt:getNow(),status:'submitted'};
   if(vars.reportCache)delete vars.reportCache[code];
-  saveReports();
+  saveReport(code);
 };
 
 window.showReportDetail=code=>{

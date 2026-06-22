@@ -154,6 +154,6 @@ export function saveHistory(){
   savePath('history', state.history);
 }
 
-export function saveReports(){
-  savePath('reports', state.reports);
+export function saveReport(code){
+  savePath('reports/' + code, state.reports[code]);
 }
