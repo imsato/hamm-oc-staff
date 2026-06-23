@@ -345,8 +345,11 @@ export function renderReports(){
   const reports=state.reports||{};
   const submittedCount=DEPTS.filter(d=>reports[d.code]&&reports[d.code].status==='submitted').length;
   const draftCount=DEPTS.filter(d=>reports[d.code]&&reports[d.code].status==='draft').length;
+  const _ds=state.session.date;
+  const _dow=['日','月','火','水','木','金','土'];
+  const _dateLabel=_ds?formatDate(_ds)+'（'+_dow[new Date(_ds+'T00:00:00').getDay()]+'）':'日付未設定';
   el.innerHTML=`
-    <div class="sec-hd">日報一覧</div>
+    <div class="sec-hd">開催日：${_dateLabel}　学科別日報一覧</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div style="font-size:12px;color:var(--color-text-secondary);">確定 ${submittedCount}件 ／ 退避 ${draftCount}件 ／ 未提出 ${DEPTS.length-submittedCount-draftCount}件</div>
       <button class="step-btn" onclick="printReports()"><i class="ti ti-printer" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>全学科印刷</button>
