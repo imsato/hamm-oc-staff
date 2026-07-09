@@ -247,6 +247,7 @@ window.showHistDetail=i=>{
         ${delBadge}
       </div>
       <div style="font-size:13px;${isDel?'color:var(--color-text-secondary);text-decoration:line-through;':'color:var(--color-text-primary);'}">${n.text}</div>
+      ${n.photo?`<img src="${n.photo}" style="max-width:100%;border-radius:var(--border-radius-md);margin-top:6px;display:block;">`:''}
     </div>`;
   }).join('');
   document.getElementById('hist-detail').style.display='block';
