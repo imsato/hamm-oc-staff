@@ -147,7 +147,7 @@ body{background:var(--color-background-secondary);font-family:var(--font-sans);m
 .notice-photo-label{display:inline-flex;align-items:center;padding:5px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary);cursor:pointer;}
 .notice-photo-label:active{background:var(--color-background-secondary);}
 /* 連絡板：投稿フォーム内プレビュー */
-.notice-photo-prev-img{width:100%;border-radius:var(--border-radius-md);margin-top:8px;display:block;}
+.notice-photo-prev-img{width:100%;max-height:180px;object-fit:contain;border-radius:var(--border-radius-md);margin-top:8px;display:block;}
 .notice-photo-cancel{margin-top:6px;padding:5px 10px;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);background:transparent;color:#633806;font-size:12px;cursor:pointer;}
 .notice-photo-cancel:active{background:#FAEEDA;}
 /* 連絡板：投稿カード内サムネイル */

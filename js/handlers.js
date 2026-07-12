@@ -120,6 +120,7 @@ window.uploadNoticePhoto=input=>{
     const img=document.getElementById('notice-photo-img');
     img.src=dataUrl;
     preview.style.display='block';
+    setTimeout(()=>preview.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
     input.value='';
   });
 };
