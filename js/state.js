@@ -30,6 +30,7 @@ export const vars = {
   schedOffset: -1,    // 開催日リスト表示開始位置（-1=最終ページ自動）
   selectedHistIdx: null, // 詳細表示中の履歴インデックス
   noticePhotoData: null,  // 連絡板：投稿前の添付写真（Base64）
+  editingNoticeId: null,  // 連絡板：編集中の投稿ID（null=新規投稿モード）
   reportExpanded: {},     // 日報フォーム展開状態 {deptCode: bool}
   reportCache: {}         // 日報入力中の一時キャッシュ {deptCode: {field: value}}
 };

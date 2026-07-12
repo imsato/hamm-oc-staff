@@ -138,12 +138,58 @@ window.postNotice=()=>{
   const name=(document.getElementById('notice-name').value||'').trim()||'名前未入力';
   const text=(document.getElementById('notice-text').value||'').trim();
   if(!text)return;
+  if(vars.editingNoticeId){
+    const idx=state.notices.findIndex(n=>n.id===vars.editingNoticeId);
+    if(idx!==-1){
+      const orig=state.notices[idx];
+      state.notices[idx]={...orig,author:name,text,tag:vars.noticeTag,
+        photo:vars.noticePhotoData||undefined,editedAt:getNow()};
+      if(!vars.noticePhotoData)delete state.notices[idx].photo;
+    }
+    cancelEditNotice();
+    saveNotices();
+    return;
+  }
   const notice={id:'n'+Date.now(),author:name,text,tag:vars.noticeTag,time:getNow(),goods:0};
   if(vars.noticePhotoData)notice.photo=vars.noticePhotoData;
   state.notices.unshift(notice);
   document.getElementById('notice-text').value='';
   clearNoticePhoto();
   saveNotices();
+};
+
+window.editNotice=i=>{
+  const n=state.notices[i];if(!n||n.deleted)return;
+  document.getElementById('notice-name').value=n.author||'';
+  document.getElementById('notice-text').value=n.text||'';
+  selTag(n.tag||'info');
+  if(n.photo){
+    vars.noticePhotoData=n.photo;
+    const preview=document.getElementById('notice-photo-preview');
+    const img=document.getElementById('notice-photo-img');
+    img.src=n.photo;preview.style.display='block';
+  } else {
+    clearNoticePhoto();
+  }
+  vars.editingNoticeId=n.id;
+  const banner=document.getElementById('notice-edit-banner');
+  if(banner)banner.style.display='flex';
+  const sendBtn=document.querySelector('.send-btn');
+  if(sendBtn)sendBtn.textContent='更新する';
+  const compose=document.querySelector('.compose');
+  if(compose)setTimeout(()=>compose.scrollIntoView({behavior:'smooth',block:'start'}),50);
+};
+
+window.cancelEditNotice=()=>{
+  vars.editingNoticeId=null;
+  document.getElementById('notice-text').value='';
+  document.getElementById('notice-name').value='';
+  selTag('info');
+  clearNoticePhoto();
+  const banner=document.getElementById('notice-edit-banner');
+  if(banner)banner.style.display='none';
+  const sendBtn=document.querySelector('.send-btn');
+  if(sendBtn)sendBtn.textContent='送信';
 };
 
 window.goodNotice=i=>{

@@ -225,6 +225,10 @@
     <span id="session-date-board" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
     <span id="time-board" style="font-size:13px;font-weight:500;color:var(--color-text-primary);"></span>
   </div>
+  <div id="notice-edit-banner" style="display:none;background:#FFF3CD;border:0.5px solid #856404;border-radius:var(--border-radius-md);padding:8px 12px;margin-bottom:8px;display:none;align-items:center;justify-content:space-between;">
+    <span style="font-size:12px;font-weight:500;color:#856404;"><i class="ti ti-pencil" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>メッセージを編集中</span>
+    <button onclick="cancelEditNotice()" style="font-size:12px;color:#856404;background:transparent;border:0.5px solid #856404;border-radius:var(--border-radius-md);padding:3px 10px;cursor:pointer;">キャンセル</button>
+  </div>
   <div class="compose">
     <input class="name-input" id="notice-name" placeholder="発信者名を入力..."/>
     <textarea id="notice-text" placeholder="スタッフへの連絡事項..." rows="3"></textarea>

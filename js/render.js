@@ -240,6 +240,7 @@ export function renderNotices(){
         <span class="badge ${tMap[n.tag]||'badge-info'}">${tLabel[n.tag]||'通知'}</span>
         <div style="display:flex;gap:6px;align-items:center;">
           <button class="notice-del-btn" onclick="deleteNotice(${i})"><i class="ti ti-trash" style="font-size:13px;vertical-align:-2px;"></i></button>
+          <button class="good-btn" onclick="editNotice(${i})" style="margin-right:2px;"><i class="ti ti-pencil" style="font-size:13px;vertical-align:-2px;margin-right:3px;"></i>編集</button>
           <button class="good-btn" onclick="goodNotice(${i})"><i class="ti ti-thumb-up" style="font-size:13px;vertical-align:-2px;margin-right:3px;"></i>${n.goods>0?n.goods+'件':'Good'}</button>
         </div>
       </div>
