@@ -31,6 +31,8 @@ export const vars = {
   selectedHistIdx: null, // 詳細表示中の履歴インデックス
   noticePhotoData: null,  // 連絡板：投稿前の添付写真（Base64）
   editingNoticeId: null,  // 連絡板：編集中の投稿ID（null=新規投稿モード）
+  searchResults: [],      // 日報検索：結果リスト
+  searchKw: '',           // 日報検索：直近キーワード（詳細ハイライト用）
   reportExpanded: {},     // 日報フォーム展開状態 {deptCode: bool}
   reportCache: {}         // 日報入力中の一時キャッシュ {deptCode: {field: value}}
 };

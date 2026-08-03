@@ -416,6 +416,77 @@ export function getDefaultPart(){
   return minutes >= 12*60+30 ? 'pm' : 'am';
 }
 
+export function renderSearch(){
+  const el=document.getElementById('admin-search');
+  if(!el)return;
+  const dates=[...new Set((state.history||[]).filter(h=>!h.deleted).map(h=>h.date))].sort((a,b)=>b.localeCompare(a));
+  el.innerHTML=`
+    <div class="sec-hd">日報 全文検索</div>
+    <div style="margin-bottom:10px;">
+      <div class="rpt-sec-label" style="margin-bottom:4px;">キーワード（部分一致・氏名など）</div>
+      <div style="display:flex;gap:6px;">
+        <input id="search-kw" type="text" class="rpt-input" placeholder="例：佐藤　本校希望" style="flex:1;" onkeydown="if(event.key==='Enter')searchReports()">
+        <button class="btn-primary" onclick="searchReports()" style="white-space:nowrap;width:auto;padding:8px 16px;margin-top:0;">検索</button>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="rpt-sec-label" style="margin-bottom:4px;">開催日で絞り込み</div>
+      <select id="search-date" style="width:100%;padding:7px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;">
+        <option value="">すべての開催日</option>
+        ${dates.map(d=>`<option value="${d}">${formatDate(d)}</option>`).join('')}
+      </select>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="rpt-sec-label" style="margin:0;">学科で絞り込み</div>
+        <button id="search-dept-all" class="rpt-chip rpt-chip-done" onclick="toggleSearchDeptAll()" style="font-size:11px;padding:4px 8px;">すべて</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        ${DEPTS.map(d=>`<button class="search-dept-chip rpt-chip rpt-chip-done" data-code="${d.code}" onclick="toggleSearchDept('${d.code}')" style="font-size:11px;padding:4px 8px;">${d.code}</button>`).join('')}
+      </div>
+    </div>
+    <div id="search-results"></div>
+    <div id="search-detail" style="display:none;"></div>
+  `;
+}
+
+export function renderSearchResults(){
+  const resultsEl=document.getElementById('search-results');
+  if(!resultsEl)return;
+  const results=vars.searchResults||[];
+  const kw=vars.searchKw||'';
+  const norm=s=>String(s||'').normalize('NFKC').replace(/\s/g,'').toLowerCase();
+  const nKw=norm(kw);
+  function snippet(text){
+    if(!text)return'';
+    const s=String(text);
+    if(!nKw)return esc(s.slice(0,80))+(s.length>80?'…':'');
+    const idx=norm(s).indexOf(nKw);
+    if(idx===-1)return esc(s.slice(0,60))+'…';
+    const start=Math.max(0,idx-25);
+    const end=Math.min(s.length,idx+kw.length+25);
+    return(start>0?'…':'')+esc(s.slice(start,end))+(end<s.length?'…':'');
+  }
+  if(!results.length){
+    resultsEl.innerHTML='<div style="font-size:13px;color:var(--color-text-secondary);padding:12px 0;">該当する日報はありません</div>';
+    return;
+  }
+  resultsEl.innerHTML=`<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">${results.length}件</div>`+
+  results.map((r,i)=>`
+    <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 12px;margin-bottom:8px;cursor:pointer;" onclick="showSearchDetail(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${formatDate(r.date)}</span>
+        <span style="font-size:12px;color:var(--color-text-secondary);">${r.deptCode}：${r.deptName}</span>
+      </div>
+      ${r.hits.slice(0,2).map(h=>`
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px;">${h.field}</div>
+        <div style="font-size:12px;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${snippet(h.val)}</div>
+      `).join('')}
+      <div style="font-size:11px;color:#0C447C;text-align:right;margin-top:6px;"><i class="ti ti-chevron-right" style="font-size:11px;vertical-align:-1px;"></i> 詳細を見る</div>
+    </div>
+  `).join('');
+}
+
 export function renderAll(){
   updateSessionDate();
   renderProgTab();

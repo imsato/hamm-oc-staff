@@ -1,6 +1,6 @@
 import { DEPTS, DEPT_KEYS, STEPS, DEFAULT_AM, DEFAULT_PM } from './config.js';
 import { state, vars, clone, newDP, getNow, formatDate, saveState, saveDept, saveCount, saveNotices, saveSession, saveSchedules, saveHistory, saveReport } from './state.js';
-import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin, renderHistList } from './render.js';
+import { renderProgTab, renderProgDongsei, renderDepts, renderAdminDongseiPreview, renderTlRows, renderAdmin, renderHistList, renderSearch, renderSearchResults } from './render.js';
 
 window.showProgPart=p=>{
   vars.progPartManual=p;
@@ -365,7 +365,14 @@ window.showTab=name=>{
 
 window.showDeptPart=p=>{vars.deptPartManual=p;vars.deptPart=p;document.getElementById('ds-am').classList.toggle('active',p==='am');document.getElementById('ds-pm').classList.toggle('active',p==='pm');renderDepts();};
 window.showCountPart=p=>{vars.deptPartManual=p;document.getElementById('count-am-sec').style.display=p==='am'?'block':'none';document.getElementById('count-pm-sec').style.display=p==='pm'?'block':'none';document.getElementById('cs-am').classList.toggle('active',p==='am');document.getElementById('cs-pm').classList.toggle('active',p==='pm');};
-window.showAdminPart=p=>{['report','sched','dept','tl','hist'].forEach(x=>{document.getElementById('admin-'+x).style.display=x===p?'block':'none';document.getElementById('as-'+x).classList.toggle('active',x===p);});if(p==='hist')document.getElementById('hist-detail').style.display='none';};
+window.showAdminPart=p=>{
+  ['search','report','sched','dept','tl','hist'].forEach(x=>{
+    document.getElementById('admin-'+x).style.display=x===p?'block':'none';
+    document.getElementById('as-'+x).classList.toggle('active',x===p);
+  });
+  if(p==='hist')document.getElementById('hist-detail').style.display='none';
+  if(p==='search')renderSearch();
+};
 
 window.setHistLimit=n=>{
   vars.histLimit=n;
@@ -385,6 +392,96 @@ window.closeHistDetail=()=>{
   vars.selectedHistIdx=null;
   document.getElementById('hist-detail').style.display='none';
   renderHistList();
+};
+
+const _SEARCH_FIELDS=[
+  {key:'reporter',label:'報告者'},{key:'location',label:'実施場所'},
+  {key:'survey',label:'アンケート志望状況'},{key:'lesson',label:'授業内容'},
+  {key:'situation',label:'参加者の状況'},{key:'kpt',label:'KPT'},
+];
+
+window.searchReports=()=>{
+  const kw=((document.getElementById('search-kw')||{}).value||'');
+  const dateFilter=((document.getElementById('search-date')||{}).value||'');
+  const selectedCodes=new Set([...document.querySelectorAll('.search-dept-chip.rpt-chip-done')].map(c=>c.dataset.code));
+  const allDepts=selectedCodes.size===DEPTS.length||selectedCodes.size===0;
+  const norm=s=>String(s||'').normalize('NFKC').replace(/\s/g,'').toLowerCase();
+  const nKw=norm(kw);
+  const results=[];
+  (state.history||[]).filter(h=>!h.deleted&&(!dateFilter||h.date===dateFilter)).forEach(h=>{
+    if(!h.reports)return;
+    DEPTS.forEach(d=>{
+      if(!allDepts&&!selectedCodes.has(d.code))return;
+      const rpt=h.reports[d.code];
+      if(!rpt||(rpt.status!=='submitted'&&rpt.status!=='draft'))return;
+      const hits=_SEARCH_FIELDS.filter(f=>{
+        const v=rpt[f.key]||'';
+        return v&&(!nKw||norm(v).includes(nKw));
+      }).map(f=>({field:f.label,val:rpt[f.key]}));
+      if(nKw&&!hits.length)return;
+      if(!hits.length)return;
+      results.push({date:h.date,deptCode:d.code,deptName:d.name,rpt,hits});
+    });
+  });
+  results.sort((a,b)=>b.date.localeCompare(a.date));
+  vars.searchResults=results;
+  vars.searchKw=kw;
+  renderSearchResults();
+};
+
+window.showSearchDetail=i=>{
+  const r=(vars.searchResults||[])[i];if(!r)return;
+  const resultsEl=document.getElementById('search-results');
+  const detailEl=document.getElementById('search-detail');
+  if(!resultsEl||!detailEl)return;
+  resultsEl.style.display='none';
+  detailEl.style.display='block';
+  const esc2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const kw=vars.searchKw||'';
+  function highlight(text){
+    if(!kw||!text)return esc2(text||'');
+    try{const re=new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+      return esc2(text).replace(re,m=>`<mark style="background:#FFF3CD;color:#856404;border-radius:2px;padding:0 1px;">${m}</mark>`);
+    }catch(e){return esc2(text);}
+  }
+  const row=(label,val)=>val?`<div style="margin-bottom:10px;"><div class="rpt-sec-label">${label}</div><div class="rpt-detail-text">${highlight(val)}</div></div>`:'';
+  const backBtn=`<button class="btn-outline" onclick="closeSearchDetail()" style="margin-bottom:12px;"><i class="ti ti-arrow-left" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>検索結果に戻る</button>`;
+  detailEl.innerHTML=`${backBtn}
+    <div class="card">
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary);">${formatDate(r.date)}　${r.deptCode}：${r.deptName}</div>
+      ${r.rpt.reporter?`<div style="font-size:13px;font-weight:500;padding:6px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:10px;color:var(--color-text-primary);">報告者：${esc2(r.rpt.reporter)}</div>`:''}
+      ${row('実施場所',r.rpt.location)}
+      ${row('アンケート志望状況',r.rpt.survey)}
+      ${row('授業内容',r.rpt.lesson)}
+      ${row('参加者の状況',r.rpt.situation)}
+      ${row('KPT',r.rpt.kpt)}
+    </div>
+    ${backBtn}`;
+  setTimeout(()=>detailEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
+};
+
+window.closeSearchDetail=()=>{
+  const d=document.getElementById('search-detail');
+  const r=document.getElementById('search-results');
+  if(d)d.style.display='none';
+  if(r)r.style.display='block';
+};
+
+window.toggleSearchDept=code=>{
+  const chip=document.querySelector(`.search-dept-chip[data-code="${code}"]`);
+  if(!chip)return;
+  chip.classList.toggle('rpt-chip-done');
+  const allOn=[...document.querySelectorAll('.search-dept-chip')].every(c=>c.classList.contains('rpt-chip-done'));
+  const ab=document.getElementById('search-dept-all');
+  if(ab)ab.classList.toggle('rpt-chip-done',allOn);
+};
+
+window.toggleSearchDeptAll=()=>{
+  const chips=[...document.querySelectorAll('.search-dept-chip')];
+  const allOn=chips.every(c=>c.classList.contains('rpt-chip-done'));
+  chips.forEach(c=>c.classList.toggle('rpt-chip-done',!allOn));
+  const ab=document.getElementById('search-dept-all');
+  if(ab)ab.classList.toggle('rpt-chip-done',!allOn);
 };
 
 // ===== 日報機能 =====
