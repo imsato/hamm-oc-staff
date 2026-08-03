@@ -455,16 +455,19 @@ export function renderSearchResults(){
   if(!resultsEl)return;
   const results=vars.searchResults||[];
   const kw=vars.searchKw||'';
-  const norm=s=>String(s||'').normalize('NFKC').replace(/\s/g,'').toLowerCase();
-  const nKw=norm(kw);
+  const normStr=s=>String(s||'').normalize('NFKC').toLowerCase();
+  const tokens=normStr(kw).split(/[\s　]+/).filter(Boolean);
   function snippet(text){
     if(!text)return'';
     const s=String(text);
-    if(!nKw)return esc(s.slice(0,80))+(s.length>80?'…':'');
-    const idx=norm(s).indexOf(nKw);
-    if(idx===-1)return esc(s.slice(0,60))+'…';
-    const start=Math.max(0,idx-25);
-    const end=Math.min(s.length,idx+kw.length+25);
+    if(!tokens.length)return esc(s.slice(0,80))+(s.length>80?'…':'');
+    const ns=normStr(s);
+    // 最初にヒットするトークン位置を基準にスニペット切り出し
+    let firstIdx=-1,firstLen=0;
+    tokens.forEach(t=>{const i=ns.indexOf(t);if(i!==-1&&(firstIdx===-1||i<firstIdx)){firstIdx=i;firstLen=t.length;}});
+    if(firstIdx===-1)return esc(s.slice(0,60))+'…';
+    const start=Math.max(0,firstIdx-25);
+    const end=Math.min(s.length,firstIdx+firstLen+25);
     return(start>0?'…':'')+esc(s.slice(start,end))+(end<s.length?'…':'');
   }
   if(!results.length){

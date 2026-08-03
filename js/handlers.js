@@ -405,8 +405,9 @@ window.searchReports=()=>{
   const dateFilter=((document.getElementById('search-date')||{}).value||'');
   const selectedCodes=new Set([...document.querySelectorAll('.search-dept-chip.rpt-chip-done')].map(c=>c.dataset.code));
   const allDepts=selectedCodes.size===DEPTS.length||selectedCodes.size===0;
-  const norm=s=>String(s||'').normalize('NFKC').replace(/\s/g,'').toLowerCase();
-  const nKw=norm(kw);
+  const normStr=s=>String(s||'').normalize('NFKC').toLowerCase();
+  // 全角・半角スペースで分割して複数トークンのAND条件に
+  const tokens=normStr(kw).split(/[\s　]+/).filter(Boolean);
   const results=[];
   (state.history||[]).filter(h=>!h.deleted&&(!dateFilter||h.date===dateFilter)).forEach(h=>{
     if(!h.reports)return;
@@ -414,11 +415,14 @@ window.searchReports=()=>{
       if(!allDepts&&!selectedCodes.has(d.code))return;
       const rpt=h.reports[d.code];
       if(!rpt||(rpt.status!=='submitted'&&rpt.status!=='draft'))return;
+      // 全フィールド結合テキストで全トークンAND判定（フィールドをまたいだ複合検索）
+      const allText=_SEARCH_FIELDS.map(f=>normStr(rpt[f.key]||'')).join('\n');
+      if(tokens.length&&!tokens.every(t=>allText.includes(t)))return;
+      // ヒット表示用：いずれかのトークンを含むフィールドを抽出
       const hits=_SEARCH_FIELDS.filter(f=>{
-        const v=rpt[f.key]||'';
-        return v&&(!nKw||norm(v).includes(nKw));
+        const v=normStr(rpt[f.key]||'');
+        return v&&(!tokens.length||tokens.some(t=>v.includes(t)));
       }).map(f=>({field:f.label,val:rpt[f.key]}));
-      if(nKw&&!hits.length)return;
       if(!hits.length)return;
       results.push({date:h.date,deptCode:d.code,deptName:d.name,rpt,hits});
     });
@@ -438,9 +442,11 @@ window.showSearchDetail=i=>{
   detailEl.style.display='block';
   const esc2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const kw=vars.searchKw||'';
+  const _tokens=String(kw).normalize('NFKC').toLowerCase().split(/[\s　]+/).filter(Boolean);
   function highlight(text){
-    if(!kw||!text)return esc2(text||'');
-    try{const re=new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+    if(!_tokens.length||!text)return esc2(text||'');
+    try{
+      const re=new RegExp(_tokens.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'gi');
       return esc2(text).replace(re,m=>`<mark style="background:#FFF3CD;color:#856404;border-radius:2px;padding:0 1px;">${m}</mark>`);
     }catch(e){return esc2(text);}
   }
