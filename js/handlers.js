@@ -409,8 +409,15 @@ window.searchReports=()=>{
   // 全角・半角スペースで分割して複数トークンのAND条件に
   const tokens=normStr(kw).split(/[\s　]+/).filter(Boolean);
   const results=[];
+  // 検索対象：過去履歴 + 当日セッション（state.reports）
+  const searchTargets=[];
   (state.history||[]).filter(h=>!h.deleted&&(!dateFilter||h.date===dateFilter)).forEach(h=>{
-    if(!h.reports)return;
+    if(h.reports) searchTargets.push({date:h.date,reports:h.reports});
+  });
+  if(state.session.active&&state.session.date&&state.reports&&(!dateFilter||dateFilter===state.session.date)){
+    searchTargets.push({date:state.session.date,reports:state.reports});
+  }
+  searchTargets.forEach(h=>{
     DEPTS.forEach(d=>{
       if(!allDepts&&!selectedCodes.has(d.code))return;
       const rpt=h.reports[d.code];

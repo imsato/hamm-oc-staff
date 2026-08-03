@@ -419,7 +419,9 @@ export function getDefaultPart(){
 export function renderSearch(){
   const el=document.getElementById('admin-search');
   if(!el)return;
-  const dates=[...new Set((state.history||[]).filter(h=>!h.deleted).map(h=>h.date))].sort((a,b)=>b.localeCompare(a));
+  const currentDate=state.session.active&&state.session.date?state.session.date:'';
+  const histDates=[...new Set((state.history||[]).filter(h=>!h.deleted).map(h=>h.date))];
+  const dates=[...new Set([...(currentDate?[currentDate]:[]),...histDates])].sort((a,b)=>b.localeCompare(a));
   el.innerHTML=`
     <div class="sec-hd">日報 全文検索</div>
     <div style="margin-bottom:10px;">
@@ -433,7 +435,7 @@ export function renderSearch(){
       <div class="rpt-sec-label" style="margin-bottom:4px;">開催日で絞り込み</div>
       <select id="search-date" style="width:100%;padding:7px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;">
         <option value="">すべての開催日</option>
-        ${dates.map(d=>`<option value="${d}">${formatDate(d)}</option>`).join('')}
+        ${dates.map(d=>`<option value="${d}">${formatDate(d)}${d===currentDate?' （当日）':''}</option>`).join('')}
       </select>
     </div>
     <div style="margin-bottom:12px;">
