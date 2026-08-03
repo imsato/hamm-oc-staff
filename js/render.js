@@ -425,7 +425,7 @@ export function renderSearch(){
     <div style="margin-bottom:10px;">
       <div class="rpt-sec-label" style="margin-bottom:4px;">キーワード（部分一致・氏名など）</div>
       <div style="display:flex;gap:6px;">
-        <input id="search-kw" type="text" class="rpt-input" placeholder="例：佐藤　本校希望" style="flex:1;" onkeydown="if(event.key==='Enter')searchReports()">
+        <input id="search-kw" type="text" class="rpt-input" placeholder="例：開誠館　佐藤" style="flex:1;" onkeydown="if(event.key==='Enter')searchReports()">
         <button class="btn-primary" onclick="searchReports()" style="white-space:nowrap;width:auto;padding:8px 16px;margin-top:0;">検索</button>
       </div>
     </div>
